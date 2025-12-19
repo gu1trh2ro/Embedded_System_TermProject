@@ -1,0 +1,8 @@
+Please add the following paths to your IAR Project Options -> C/C++ Compiler -> Preprocessor -> Additional include directories:
+
+$PROJ_DIR$\..\Micrium\Software\uC-CPU
+$PROJ_DIR$\..\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR
+$PROJ_DIR$\..\Micrium\Software\uCOS-III\Source
+$PROJ_DIR$\..\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR
+
+(Note: Adjust $PROJ_DIR$\.. depending on where your .ewp project file is located relative to the Micrium folder. If your project file is in the root C:\Chano\Coding\Embedded_System_TermProject, then remove the "..\")
