@@ -2247,12 +2247,39 @@
         <group>
             <name>inc</name>
             <file>
+                <name>$PROJ_DIR$\user\inc\app_tasks.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\user\inc\bsp.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\user\inc\globals.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\user\inc\includes.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\user\inc\stm32f10x_conf.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\user\inc\stm32f10x_it.h</name>
             </file>
         </group>
+        <group>
+            <name>uCOS-III</name>
+            <file>
+                <name>$PROJ_DIR$\user\uCOS-III\cpu_cfg.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\user\uCOS-III\lib_cfg.h</name>
+            </file>
+        </group>
+        <file>
+            <name>$PROJ_DIR$\user\app_tasks.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\user\bsp.c</name>
+        </file>
         <file>
             <name>$PROJ_DIR$\user\main.c</name>
         </file>
