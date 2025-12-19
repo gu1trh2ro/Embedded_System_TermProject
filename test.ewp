@@ -348,6 +348,10 @@
                     <state>$PROJ_DIR$\user</state>
                     <state>$PROJ_DIR$\user\inc</state>
                     <state>$PROJ_DIR$\libraries\LCD</state>
+                    <state>$PROJ_DIR$\Micrium\Software\uC-CPU</state>
+                    <state>$PROJ_DIR$\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR</state>
+                    <state>$PROJ_DIR$\Micrium\Software\uCOS-III\Source</state>
+                    <state>$PROJ_DIR$\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
