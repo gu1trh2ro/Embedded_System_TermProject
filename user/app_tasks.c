@@ -7,6 +7,9 @@
 OS_Q PirDataQ;
 OS_Q StateQ;
 OS_Q ServoQ;
+OS_Q BluetoothRxQ;
+
+const uint8_t MSG_TOUCH_RESET_CODE = 255;
 
 // Task Stacks & TCBs (Defined here or extern if needed elsewhere)
 OS_TCB PirTaskTCB;
@@ -117,6 +120,7 @@ void AppTaskStart(void *p_arg) {
     // Create RTOS Objects
     OSQCreate(&PirDataQ, "PirQ", 10, &err);
     OSQCreate(&ServoQ, "ServoQ", 5, &err);
+    OSQCreate(&BluetoothRxQ, "BluetoothRxQ", 10, &err); // Add Bluetooth Queue
     
     // Create Application Tasks
     OSTaskCreate(&PirTaskTCB, "PIR Task", PIR_Task, 0, 4, &PirTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);

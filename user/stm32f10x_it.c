@@ -9,16 +9,12 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f10x_it.h"
-// 필요한 주변 장치 헤더 추가
-#include "stm32f10x_exti.h"
-#include "stm32f10x_usart.h"
-#include "stm32f10x_gpio.h" // 디버깅용 GPIO 토글 함수를 위해 추가
+#include <includes.h>
 
 // =======================================================
 // [RTOS 통합] µC/OS-III 관련 외부 선언 (main.c에 정의되어 있음)
 // =======================================================
-#include "os.h" // µC/OS-III 핵심 헤더. RTOS 라이브러리 추가 후 주석 해제 필요
+// #include "os.h" // includes.h에 포함됨
 extern OS_Q   PirDataQ;    // 터치 센서 이벤트를 Status_Task로 전달 (MSG_TOUCH_RESET_CODE)
 extern OS_Q   BluetoothRxQ; // 수신된 블루투스 데이터를 Bluetooth_Task로 전달
 extern const uint8_t MSG_TOUCH_RESET_CODE; // main.c의 상수를 extern 선언
@@ -105,7 +101,7 @@ void DebugMon_Handler(void)
 void PendSV_Handler(void)
 {
     // µC/OS-III의 컨텍스트 스위칭 핸들러
-    // OS_CPU_PendSVHandler(); 
+    OS_CPU_PendSVHandler(); 
 }
 
 /**
@@ -114,7 +110,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
     // µC/OS-III의 시스템 틱 핸들러
-    // OSTimeTick(); 
+    OS_CPU_SysTickHandler(); 
 }
 
 /******************************************************************************/
@@ -136,7 +132,7 @@ void EXTI1_IRQHandler(void)
         // PIR 데이터 큐에 특수 코드를 넣어 Status_Task를 깨웁니다.
         
         // 인터럽트 발생 시 OS 함수를 호출할 때는 반드시 임계 영역(Critical Section) 진입 로직 필요
-        // OSQPost(&PirDataQ, &touch_code, sizeof(touch_code), OS_OPT_POST_FIFO, &err); 
+         OSQPost(&PirDataQ, &touch_code, sizeof(touch_code), OS_OPT_POST_FIFO, &err); 
         
         // *[RTOS 미구현 시 디버깅용]*
         // GPIO_WriteBit(GPIOC, GPIO_Pin_9, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOC, GPIO_Pin_9)));
@@ -163,7 +159,7 @@ void USART2_IRQHandler(void)
         rx_data = (uint8_t)USART_ReceiveData(USART2);
 
         // 2. 수신된 데이터를 Bluetooth_Task의 큐에 전송 (비동기 처리)
-        // OSQPost(&BluetoothRxQ, &rx_data, sizeof(rx_data), OS_OPT_POST_FIFO, &err);
+         OSQPost(&BluetoothRxQ, &rx_data, sizeof(rx_data), OS_OPT_POST_FIFO, &err);
         
         // 3. 인터럽트 플래그 클리어
         USART_ClearITPendingBit(USART2, USART_IT_RXNE);
