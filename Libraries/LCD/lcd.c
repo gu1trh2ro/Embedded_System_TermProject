@@ -17,27 +17,30 @@ uint16_t DeviceCode;
 static void LCD_WR_REG(uint16_t LCD_Reg)
 {
 	// TODO implement using GPIO_ResetBits/GPIO_SetBits
-	GPIO_ResetBits(GPIOD, GPIO_Pin_13); //DC low
-        GPIO_ResetBits(GPIOC, GPIO_Pin_8); //cs low
-        GPIO_ResetBits(GPIOB, GPIO_Pin_14); //wr low
+	GPIO_ResetBits(GPIOD, GPIO_Pin_13); // LCD_RS(0);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_14); // LCD_WR(0);
+	GPIO_ResetBits(GPIOC, GPIO_Pin_8);  // LCD_CS(0);
+
 	GPIO_Write(GPIOE, LCD_Reg);
+
 	// TODO implement using GPIO_ResetBits/GPIO_SetBits
-	GPIO_SetBits(GPIOC, GPIO_Pin_8); //cs high
-        GPIO_SetBits(GPIOB, GPIO_Pin_14); //wr high
+	GPIO_SetBits(GPIOC, GPIO_Pin_8);  // LCD_CS(1);
+	GPIO_SetBits(GPIOB, GPIO_Pin_14); // LCD_WR(1);
 }
 
 static void LCD_WR_DATA(uint16_t LCD_Data)
 {
 	// TODO implement using GPIO_ResetBits/GPIO_SetBits
-	GPIO_SetBits(GPIOD, GPIO_Pin_13); //DC high
-        GPIO_ResetBits(GPIOC, GPIO_Pin_8);//cs low
-        GPIO_ResetBits(GPIOB, GPIO_Pin_14); //wr low
+	GPIO_SetBits(GPIOD, GPIO_Pin_13);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_14);
+	GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+	
 	GPIO_Write(GPIOE, LCD_Data);
+	
 	// TODO implement using GPIO_ResetBits/GPIO_SetBits
-        GPIO_SetBits(GPIOC, GPIO_Pin_8); //cs high
-        GPIO_SetBits(GPIOB, GPIO_Pin_14); //wr high
+	GPIO_SetBits(GPIOC, GPIO_Pin_8);
+	GPIO_SetBits(GPIOB, GPIO_Pin_14);
 }
-
 
 static uint16_t LCD_ReadReg(uint16_t LCD_Reg)
 {

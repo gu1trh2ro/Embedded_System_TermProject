@@ -147,6 +147,32 @@ void EXTI1_IRQHandler(void)
   * @brief  This function handles USART2 global interrupt request (Bluetooth RX).
   * (원격 제어 명령 수신용)
   */
+/**
+  * @brief  This function handles USART1 global interrupt request (PC Communication).
+  * (PC에서 수신된 데이터를 블루투스로 전송 - Echo)
+  */
+void USART1_IRQHandler(void)
+{
+    uint16_t word;
+    if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+        /* 수신된 데이터 읽기 */
+        word = USART_ReceiveData(USART1);       
+
+        /* 전송 버퍼가 비워질 때까지 대기 */    
+        while ((USART2->SR & USART_SR_TXE) == 0);
+
+        /* 블루투스로 전송 */
+        USART_SendData(USART2, word);
+
+        /* RX 인터럽트 플래그 클리어 */
+        USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+    }
+}
+
+/**
+  * @brief  This function handles USART2 global interrupt request (Bluetooth RX).
+  * (원격 제어 명령 수신용 + PC Echo)
+  */
 void USART2_IRQHandler(void)
 {
     OS_ERR err;
@@ -157,6 +183,10 @@ void USART2_IRQHandler(void)
     {
         // 1. 데이터 읽기
         rx_data = (uint8_t)USART_ReceiveData(USART2);
+
+        // [Reference Logic] PC로 에코 전송
+        while ((USART1->SR & USART_SR_TXE) == 0);
+        USART_SendData(USART1, rx_data);
 
         // 2. 수신된 데이터를 Bluetooth_Task의 큐에 전송 (비동기 처리)
          OSQPost(&BluetoothRxQ, &rx_data, sizeof(rx_data), OS_OPT_POST_FIFO, &err);

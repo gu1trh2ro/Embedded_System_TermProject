@@ -5,37 +5,37 @@
 
 // --- Pin Definitions (Refactored for Safety) ---
 
-// PIR Sensor (Changed from PA5 to PE2)
-#define PIR_PORT        GPIOE
-#define PIR_PIN         GPIO_Pin_2
-#define PIR_RCC         RCC_APB2Periph_GPIOE
+// PIR Sensor (Remapped to PC1)
+#define PIR_PORT        GPIOC
+#define PIR_PIN         GPIO_Pin_1
+#define PIR_RCC         RCC_APB2Periph_GPIOC
 
-// Touch Sensor (Changed from PA1 to PE3)
-#define TOUCH_PORT      GPIOE
-#define TOUCH_PIN       GPIO_Pin_3
-#define TOUCH_RCC       RCC_APB2Periph_GPIOE
-#define TOUCH_EXTI_Line EXTI_Line3
-#define TOUCH_PortSource GPIO_PortSourceGPIOE
-#define TOUCH_PinSource  GPIO_PinSource3
-#define TOUCH_IRQn       EXTI3_IRQn
+// Touch Sensor (Remapped to PC2)
+#define TOUCH_PORT      GPIOC
+#define TOUCH_PIN       GPIO_Pin_2
+#define TOUCH_RCC       RCC_APB2Periph_GPIOC
+#define TOUCH_EXTI_Line EXTI_Line2
+#define TOUCH_PortSource GPIO_PortSourceGPIOC
+#define TOUCH_PinSource  GPIO_PinSource2
+#define TOUCH_IRQn       EXTI2_IRQn
 
-// Light Sensor (Changed from PB0 to PC0/ADC12_IN10)
-// Using onboard Potentiometer for testing
-#define LIGHT_PORT      GPIOC
+// Light Sensor (Restored to PB0/ADC12_IN8 for Unmoved HW)
+#define LIGHT_PORT      GPIOB
 #define LIGHT_PIN       GPIO_Pin_0
-#define LIGHT_RCC       RCC_APB2Periph_GPIOC
-#define LIGHT_ADC_CH    ADC_Channel_10
+#define LIGHT_RCC       RCC_APB2Periph_GPIOB
+#define LIGHT_ADC_CH    ADC_Channel_8
 
-// Servo Motor (Changed from PA6 to PE9/TIM1_CH1)
-#define SERVO_PORT      GPIOE
-#define SERVO_PIN       GPIO_Pin_9
-#define SERVO_RCC_GPIO  RCC_APB2Periph_GPIOE
-#define SERVO_RCC_TIM   RCC_APB2Periph_TIM1
+// Servo Motor (Remapped to PB6/TIM4_CH1)
+#define SERVO_PORT      GPIOB
+#define SERVO_PIN       GPIO_Pin_6
+#define SERVO_RCC_GPIO  RCC_APB2Periph_GPIOB
+#define SERVO_RCC_TIM   RCC_APB1Periph_TIM4
 
-// LED & LCD (Existing)
-#define LED_PORT        GPIOC
-#define LED1_PIN        GPIO_Pin_8 // Green (Occupied)
-#define LED2_PIN        GPIO_Pin_9 // Red (Suspicious/Vacant)
+// LED (Remapped to PD3, PD4)
+#define LED_PORT        GPIOD
+#define LED_RCC         RCC_APB2Periph_GPIOD
+#define LED1_PIN        GPIO_Pin_3 // Green (Occupied)
+#define LED2_PIN        GPIO_Pin_4 // Red (Suspicious/Vacant)
 
 // --- Function Prototypes ---
 void BSP_Init(void);
@@ -54,3 +54,4 @@ uint8_t PIR_Read(void);
 void Bluetooth_Send(uint8_t data);
 
 #endif // __BSP_H__
+

@@ -25,6 +25,10 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\u
 -I
 C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR
 -I
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\uCOS-III
+-I
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-LIB
+-I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CMSIS\Core\Include
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include
@@ -54,6 +58,10 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\u
 C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source
 -I
 C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR
+-I
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\uCOS-III
+-I
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-LIB
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CMSIS\Core\Include
 -I
