@@ -1,590 +1,179 @@
 ###############################################################################
 #
-# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       09/Dec/2025  18:56:33
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       20/Dec/2025  11:44:49
 # Copyright 1999-2018 IAR Systems AB.
 #
 #    Cpu mode     =  thumb
 #    Endian       =  little
 #    Source file  =  
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\user\main.c
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\main.c
 #    Command line =  
-#        -f C:\Users\pnu1\AppData\Local\Temp\EWFF91.tmp
-#        (C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\user\main.c
+#        -f C:\Users\pnu3\AppData\Local\Temp\EW2622.tmp
+#        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\main.c
 #        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\Debug\List -o
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\Debug\Obj
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
+#        -o
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj
 #        --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
 #        --no_clustering --no_scheduling --debug --endian=little
 #        --cpu=Cortex-M3 -e --fpu=None --dlib_config "C:\Program Files
 #        (x86)\IAR Systems\Embedded Workbench
 #        8.0\arm\INC\c\DLib_Config_Normal.h" -I
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\libraries\CMSIS\DeviceSupport\
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\
 #        -I
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\libraries\CMSIS\DeviceSupport\Startup\
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\Startup\
 #        -I
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\libraries\STM32F10x_StdPeriph_Driver_v3.5\inc\
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\inc\
 #        -I
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\libraries\STM32F10x_StdPeriph_Driver_v3.5\src\
-#        -I C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\user\ -I
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\user\inc\ -I
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\libraries\LCD\
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\src\
+#        -I C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\inc\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\LCD\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\uCOS-III\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-LIB\
 #        -Ol -I "C:\Program Files (x86)\IAR Systems\Embedded Workbench
 #        8.0\arm\CMSIS\Core\Include\" -I "C:\Program Files (x86)\IAR
 #        Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include\")
 #    Locale       =  C
 #    List file    =  
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\Debug\List\main.lst
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List\main.lst
 #    Object file  =  
-#        C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\Debug\Obj\main.o
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj\main.o
 #
 ###############################################################################
 
-C:\Users\pnu1\Desktop\tue01\project_test_2\project_test\user\main.c
-      1          #include "stm32f10x.h"
-      2          #include "core_cm3.h"
-      3          #include "misc.h"
-      4          #include "stm32f10x_gpio.h"
-      5          #include "stm32f10x_rcc.h"
-      6          #include "stm32f10x_usart.h" // @@@@ @@(FB755AC) @@@ @@ @@
-      7          #include "stm32f10x_adc.h"   // @@ @@ @@@ @@ @@
-      8          #include "stm32f10x_tim.h"   // @@ @@(SG90) PWM @@@ @@ @@
-      9          #include "stm32f10x_exti.h"  // @@ @@(EXTI @@@@) @@@ @@ @@
-     10          #include "lcd.h"
-     11          #include "touch.h"
-     12          // #include <os.h>  // @C/OS-III @@ @@ (@@ @@@ @@ @@ @@)
-     13          
-     14          // -----------------------------------------------------------
-     15          // @@ @@@@@@ @@@@ ADC/LCD @@ @@ @@@ @@@@@.
-     16          // (@@@ @@@ RTOS @ @@ @@ @@@@ @@@@@.)
-     17          // -----------------------------------------------------------
-     18          
-     19          // AppTaskStart @@ @@ (@C/OS-III@@ @@ @@@@@@ @@@ @ @@@ @@ @@@ @@)
-     20          void AppTaskStart (void *p_arg); // RTOS @@@ @@@ OS_TASK_PTR @@@ @@@
-     21          
-     22          // @@@@ @@ @@ @@@@@ @@
-     23          void BT_USART_Init(void);
-     24          void BT_NVIC_Configure(void);
-     25          void BT_SendData(uint8_t data);
-     26          
-     27          
-     28          /* ===========================================================
-     29           * 1. @@@ @@ @@ @@ @@
-     30           * =========================================================== */
-
-   \                                 In section .text, align 2, keep-with-next
-     31          void RCC_Configure(void)
-     32          {
-   \                     RCC_Configure: (+1)
-   \   00000000   0xB580             PUSH     {R7,LR}
-     33              // @@ @@ (@@ @@@)
-     34              RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); // @@ @@(PB.0)
-   \   00000002   0x2101             MOVS     R1,#+1
-   \   00000004   0x2008             MOVS     R0,#+8
-   \   00000006   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
-     35              RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-   \   0000000A   0x2101             MOVS     R1,#+1
-   \   0000000C   0xF44F 0x7000      MOV      R0,#+512
-   \   00000010   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
-     36              RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-   \   00000014   0x2101             MOVS     R1,#+1
-   \   00000016   0x2001             MOVS     R0,#+1
-   \   00000018   0x.... 0x....      BL       RCC_AHBPeriphClockCmd
-     37          
-     38              // [@@@@, GPIOA, AFIO @@ @@]
-     39              // GPIOA (USART2 TX/RX, @@ @@/@@ @) @@ Enable
-     40              RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-   \   0000001C   0x2101             MOVS     R1,#+1
-   \   0000001E   0x2004             MOVS     R0,#+4
-   \   00000020   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
-     41              // AFIO (Alternate Function IO, EXTI, USART @@@) @@ Enable
-     42              RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); 
-   \   00000024   0x2101             MOVS     R1,#+1
-   \   00000026   0x2001             MOVS     R0,#+1
-   \   00000028   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
-     43              // USART2 @@ Enable (APB1)
-     44              RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-   \   0000002C   0x2101             MOVS     R1,#+1
-   \   0000002E   0xF45F 0x3000      MOVS     R0,#+131072
-   \   00000032   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
-     45          
-     46              // *[@@ @@]* LED, @@ @@(TIMx) @@ @@@ @@ @@@
-     47              // @: RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); 
-     48          }
-   \   00000036   0xBD01             POP      {R0,PC}          ;; return
-     49          
-     50          /* ===========================================================
-     51           * 2. @@@ GPIO @ @@
-     52           * =========================================================== */
-
-   \                                 In section .text, align 2, keep-with-next
-     53          void GPIO_Configure(void)
-     54          {
-   \                     GPIO_Configure: (+1)
-   \   00000000   0xB580             PUSH     {R7,LR}
-     55              GPIO_InitTypeDef GPIO_InitStructure;
-     56          
-     57              // @@ @@ (@@ @@ @@, PB.0)
-     58              GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-   \   00000002   0x2001             MOVS     R0,#+1
-   \   00000004   0xF8AD 0x0000      STRH     R0,[SP, #+0]
-     59              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-   \   00000008   0x2000             MOVS     R0,#+0
-   \   0000000A   0xF88D 0x0003      STRB     R0,[SP, #+3]
-     60              GPIO_Init(GPIOB, &GPIO_InitStructure);
-   \   0000000E   0x4669             MOV      R1,SP
-   \   00000010   0x....             LDR.N    R0,??DataTable5  ;; 0x40010c00
-   \   00000012   0x.... 0x....      BL       GPIO_Init
-     61          
-     62              // [@@@@ USART2 TX/RX @ @@] (PA2/PA3)
-     63              // USART2 TX (PA2) @ Alternate Function Push-Pull
-     64              GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-   \   00000016   0x2004             MOVS     R0,#+4
-   \   00000018   0xF8AD 0x0000      STRH     R0,[SP, #+0]
-     65              GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-   \   0000001C   0x2003             MOVS     R0,#+3
-   \   0000001E   0xF88D 0x0002      STRB     R0,[SP, #+2]
-     66              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-   \   00000022   0x2018             MOVS     R0,#+24
-   \   00000024   0xF88D 0x0003      STRB     R0,[SP, #+3]
-     67              GPIO_Init(GPIOA, &GPIO_InitStructure);
-   \   00000028   0x4669             MOV      R1,SP
-   \   0000002A   0x....             LDR.N    R0,??DataTable5_1  ;; 0x40010800
-   \   0000002C   0x.... 0x....      BL       GPIO_Init
-     68          
-     69              // USART2 RX (PA3) @ Input Pull-Up
-     70              GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-   \   00000030   0x2008             MOVS     R0,#+8
-   \   00000032   0xF8AD 0x0000      STRH     R0,[SP, #+0]
-     71              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-   \   00000036   0x2048             MOVS     R0,#+72
-   \   00000038   0xF88D 0x0003      STRB     R0,[SP, #+3]
-     72              GPIO_Init(GPIOA, &GPIO_InitStructure);
-   \   0000003C   0x4669             MOV      R1,SP
-   \   0000003E   0x....             LDR.N    R0,??DataTable5_1  ;; 0x40010800
-   \   00000040   0x.... 0x....      BL       GPIO_Init
-     73          
-     74              // *[@@ @@]* PIR @@, LED @@, @@ @@ @@, @@ @@ PWM @@ @ @@
-     75          }
-   \   00000044   0xBD01             POP      {R0,PC}          ;; return
-     76          
-     77          /* ===========================================================
-     78           * 3. ADC @@ (@@ @@@ @@@ @@)
-     79           * =========================================================== */
-
-   \                                 In section .text, align 2, keep-with-next
-     80          void ADC_Configure(){
-   \                     ADC_Configure: (+1)
-   \   00000000   0xB500             PUSH     {LR}
-   \   00000002   0xB085             SUB      SP,SP,#+20
-     81              ADC_InitTypeDef ADC_InitStructure;
-     82              // ... (@@ ADC_Configure @@)
-     83              
-     84              ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
-   \   00000004   0x2000             MOVS     R0,#+0
-   \   00000006   0x9000             STR      R0,[SP, #+0]
-     85              ADC_InitStructure.ADC_ScanConvMode = DISABLE;
-   \   00000008   0x2000             MOVS     R0,#+0
-   \   0000000A   0xF88D 0x0004      STRB     R0,[SP, #+4]
-     86              ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
-   \   0000000E   0x2000             MOVS     R0,#+0
-   \   00000010   0xF88D 0x0005      STRB     R0,[SP, #+5]
-     87              ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-   \   00000014   0xF45F 0x2060      MOVS     R0,#+917504
-   \   00000018   0x9002             STR      R0,[SP, #+8]
-     88              ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-   \   0000001A   0x2000             MOVS     R0,#+0
-   \   0000001C   0x9003             STR      R0,[SP, #+12]
-     89              ADC_InitStructure.ADC_NbrOfChannel = 1;
-   \   0000001E   0x2001             MOVS     R0,#+1
-   \   00000020   0xF88D 0x0010      STRB     R0,[SP, #+16]
-     90          
-     91              ADC_Init(ADC1, &ADC_InitStructure);
-   \   00000024   0x4669             MOV      R1,SP
-   \   00000026   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   00000028   0x.... 0x....      BL       ADC_Init
-     92          
-     93              ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5);
-   \   0000002C   0x2305             MOVS     R3,#+5
-   \   0000002E   0x2201             MOVS     R2,#+1
-   \   00000030   0x2108             MOVS     R1,#+8
-   \   00000032   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   00000034   0x.... 0x....      BL       ADC_RegularChannelConfig
-     94          
-     95              ADC_DMACmd(ADC1, ENABLE);
-   \   00000038   0x2101             MOVS     R1,#+1
-   \   0000003A   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   0000003C   0x.... 0x....      BL       ADC_DMACmd
-     96          
-     97              ADC_Cmd(ADC1, ENABLE);
-   \   00000040   0x2101             MOVS     R1,#+1
-   \   00000042   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   00000044   0x.... 0x....      BL       ADC_Cmd
-     98              ADC_ResetCalibration(ADC1);
-   \   00000048   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   0000004A   0x.... 0x....      BL       ADC_ResetCalibration
-     99              while(ADC_GetResetCalibrationStatus(ADC1)){ }
-   \                     ??ADC_Configure_0: (+1)
-   \   0000004E   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   00000050   0x.... 0x....      BL       ADC_GetResetCalibrationStatus
-   \   00000054   0x2800             CMP      R0,#+0
-   \   00000056   0xD1FA             BNE.N    ??ADC_Configure_0
-    100              ADC_StartCalibration(ADC1);
-   \   00000058   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   0000005A   0x.... 0x....      BL       ADC_StartCalibration
-    101              while(ADC_GetCalibrationStatus(ADC1)){ }
-   \                     ??ADC_Configure_1: (+1)
-   \   0000005E   0x....             LDR.N    R0,??DataTable5_2  ;; 0x40012400
-   \   00000060   0x.... 0x....      BL       ADC_GetCalibrationStatus
-   \   00000064   0x2800             CMP      R0,#+0
-   \   00000066   0xD1FA             BNE.N    ??ADC_Configure_1
-    102              // ADC_SoftwareStartConvCmd(ADC1, ENABLE); // @@ @@@@ @@@@ Light_Sensor_Task@@ @@
-    103          }
-   \   00000068   0xB005             ADD      SP,SP,#+20
-   \   0000006A   0xBD00             POP      {PC}             ;; return
-    104          
-    105          /* ===========================================================
-    106           * 4. DMA @@ (@@ @@@ @@@ @@)
-    107           * =========================================================== */
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\main.c
+      1          #include <includes.h>
+      2          #include "app_tasks.h"
+      3          
+      4          // Start Task TCB & Stack
 
    \                                 In section .bss, align 4
-    108          volatile uint32_t ADC_Value[1] ; // DMA @@@ @@ @@@ @@ @@@ @@@@@. (@@ @@@@@@@ Light_Sensor_Task@@ @@)
-   \                     ADC_Value:
-   \   00000000                      DS8 4
-    109          
+      5          static OS_TCB AppTaskStartTCB;
+   \                     AppTaskStartTCB:
+   \   00000000                      DS8 168
 
-   \                                 In section .text, align 2, keep-with-next
-    110          void DMA_Configure(void){
-   \                     DMA_Configure: (+1)
-   \   00000000   0xB500             PUSH     {LR}
-   \   00000002   0xB08B             SUB      SP,SP,#+44
-    111              DMA_InitTypeDef DMA_Instructure;
-    112              DMA_DeInit(DMA1_Channel1);
-   \   00000004   0x....             LDR.N    R0,??DataTable5_3  ;; 0x40020008
-   \   00000006   0x.... 0x....      BL       DMA_DeInit
-    113              DMA_Instructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
-   \   0000000A   0x....             LDR.N    R0,??DataTable5_4  ;; 0x4001244c
-   \   0000000C   0x9000             STR      R0,[SP, #+0]
-    114              DMA_Instructure.DMA_MemoryBaseAddr=(uint32_t)&ADC_Value[0];
-   \   0000000E   0x....             LDR.N    R0,??DataTable5_5
-   \   00000010   0x9001             STR      R0,[SP, #+4]
-    115          
-    116              DMA_Instructure.DMA_Mode=DMA_Mode_Circular;
-   \   00000012   0x2020             MOVS     R0,#+32
-   \   00000014   0x9008             STR      R0,[SP, #+32]
-    117              DMA_Instructure.DMA_Priority= DMA_Priority_VeryHigh;
-   \   00000016   0xF44F 0x5040      MOV      R0,#+12288
-   \   0000001A   0x9009             STR      R0,[SP, #+36]
-    118              DMA_Instructure.DMA_M2M= DMA_M2M_Disable;
-   \   0000001C   0x2000             MOVS     R0,#+0
-   \   0000001E   0x900A             STR      R0,[SP, #+40]
-    119              DMA_Instructure.DMA_BufferSize=1; // ADC_Value@ @@@ @@ 1@ @@
-   \   00000020   0x2001             MOVS     R0,#+1
-   \   00000022   0x9003             STR      R0,[SP, #+12]
-    120              DMA_Instructure.DMA_DIR= DMA_DIR_PeripheralSRC;
-   \   00000024   0x2000             MOVS     R0,#+0
-   \   00000026   0x9002             STR      R0,[SP, #+8]
-    121              DMA_Instructure.DMA_MemoryInc=DMA_MemoryInc_Disable; // @@ @@@@@ Disable
-   \   00000028   0x2000             MOVS     R0,#+0
-   \   0000002A   0x9005             STR      R0,[SP, #+20]
-    122              DMA_Instructure.DMA_MemoryDataSize=DMA_MemoryDataSize_Word; // ADC @@@ 12@@@@@ Word @@ HalfWord
-   \   0000002C   0xF44F 0x6000      MOV      R0,#+2048
-   \   00000030   0x9007             STR      R0,[SP, #+28]
-    123              DMA_Instructure.DMA_PeripheralDataSize=DMA_PeripheralDataSize_Word; // Word @@ HalfWord
-   \   00000032   0xF44F 0x7000      MOV      R0,#+512
-   \   00000036   0x9006             STR      R0,[SP, #+24]
-    124              DMA_Instructure.DMA_PeripheralInc=DMA_PeripheralInc_Disable; // @@ @@ @@ @@@ @@@@
-   \   00000038   0x2000             MOVS     R0,#+0
-   \   0000003A   0x9004             STR      R0,[SP, #+16]
-    125              DMA_Init(DMA1_Channel1, &DMA_Instructure);
-   \   0000003C   0x4669             MOV      R1,SP
-   \   0000003E   0x....             LDR.N    R0,??DataTable5_3  ;; 0x40020008
-   \   00000040   0x.... 0x....      BL       DMA_Init
-    126              DMA_Cmd(DMA1_Channel1, ENABLE);
-   \   00000044   0x2101             MOVS     R1,#+1
-   \   00000046   0x....             LDR.N    R0,??DataTable5_3  ;; 0x40020008
-   \   00000048   0x.... 0x....      BL       DMA_Cmd
-    127          }
-   \   0000004C   0xB00B             ADD      SP,SP,#+44
-   \   0000004E   0xBD00             POP      {PC}             ;; return
-    128          
-    129          /* ===========================================================
-    130           * 5. @@@@ USART @@@ (BT_USART_Init)
-    131           * =========================================================== */
+   \                                 In section .bss, align 4
+      6          static CPU_STK AppTaskStartStk[256];
+   \                     AppTaskStartStk:
+   \   00000000                      DS8 1024
+      7          
 
-   \                                 In section .text, align 2, keep-with-next
-    132          void BT_USART_Init(void)
-    133          {
-   \                     BT_USART_Init: (+1)
-   \   00000000   0xB5F8             PUSH     {R3-R7,LR}
-    134              USART_InitTypeDef USART_InitStructure;
-    135          
-    136              // @@@@ @@(FB755AC) @@
-    137              USART_InitStructure.USART_BaudRate = 9600; // @@@@ @@@ @@ @@@ @@
-   \   00000002   0xF44F 0x5016      MOV      R0,#+9600
-   \   00000006   0x9000             STR      R0,[SP, #+0]
-    138              USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-   \   00000008   0x2000             MOVS     R0,#+0
-   \   0000000A   0xF8AD 0x0004      STRH     R0,[SP, #+4]
-    139              USART_InitStructure.USART_StopBits = USART_StopBits_1_5;
-   \   0000000E   0xF44F 0x5040      MOV      R0,#+12288
-   \   00000012   0xF8AD 0x0006      STRH     R0,[SP, #+6]
-    140              USART_InitStructure.USART_Parity = USART_Parity_No;
-   \   00000016   0x2000             MOVS     R0,#+0
-   \   00000018   0xF8AD 0x0008      STRH     R0,[SP, #+8]
-    141              USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-   \   0000001C   0x2000             MOVS     R0,#+0
-   \   0000001E   0xF8AD 0x000C      STRH     R0,[SP, #+12]
-    142              USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-   \   00000022   0x200C             MOVS     R0,#+12
-   \   00000024   0xF8AD 0x000A      STRH     R0,[SP, #+10]
-    143          
-    144              USART_Init(USART2, &USART_InitStructure);
-   \   00000028   0x4669             MOV      R1,SP
-   \   0000002A   0x....             LDR.N    R0,??DataTable5_6  ;; 0x40004400
-   \   0000002C   0x.... 0x....      BL       USART_Init
-    145          
-    146              // RX @@@@ @@@ (@@ @@ @@ @@@)
-    147              USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-   \   00000030   0x2201             MOVS     R2,#+1
-   \   00000032   0xF240 0x5125      MOVW     R1,#+1317
-   \   00000036   0x....             LDR.N    R0,??DataTable5_6  ;; 0x40004400
-   \   00000038   0x.... 0x....      BL       USART_ITConfig
-    148          
-    149              // USART2 @@ Enable
-    150              USART_Cmd(USART2, ENABLE);
-   \   0000003C   0x2101             MOVS     R1,#+1
-   \   0000003E   0x....             LDR.N    R0,??DataTable5_6  ;; 0x40004400
-   \   00000040   0x.... 0x....      BL       USART_Cmd
-    151          }
-   \   00000044   0xB005             ADD      SP,SP,#+20
-   \   00000046   0xBD00             POP      {PC}             ;; return
-    152          
-    153          /* ===========================================================
-    154           * 6. @@@@ NVIC @@ (BT_NVIC_Configure)
-    155           * =========================================================== */
-
-   \                                 In section .text, align 2, keep-with-next
-    156          void BT_NVIC_Configure(void)
-    157          {
-   \                     BT_NVIC_Configure: (+1)
-   \   00000000   0xB580             PUSH     {R7,LR}
-    158              NVIC_InitTypeDef NVIC_InitStructure;
-    159          
-    160              // NVIC @@@@ @@ @@ (@@@@ @@@ @@@@@ @)
-    161              NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-   \   00000002   0xF44F 0x60A0      MOV      R0,#+1280
-   \   00000006   0x.... 0x....      BL       NVIC_PriorityGroupConfig
-    162          
-    163              // USART2 @@@@ @@
-    164              NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-   \   0000000A   0x2026             MOVS     R0,#+38
-   \   0000000C   0xF88D 0x0000      STRB     R0,[SP, #+0]
-    165              NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3; // RTOS @@@ @@@@ @@@ @@
-   \   00000010   0x2003             MOVS     R0,#+3
-   \   00000012   0xF88D 0x0001      STRB     R0,[SP, #+1]
-    166              NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-   \   00000016   0x2001             MOVS     R0,#+1
-   \   00000018   0xF88D 0x0002      STRB     R0,[SP, #+2]
-    167              NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-   \   0000001C   0x2001             MOVS     R0,#+1
-   \   0000001E   0xF88D 0x0003      STRB     R0,[SP, #+3]
-    168              NVIC_Init(&NVIC_InitStructure);
-   \   00000022   0x4668             MOV      R0,SP
-   \   00000024   0x.... 0x....      BL       NVIC_Init
-    169          }
-   \   00000028   0xBD01             POP      {R0,PC}          ;; return
-    170          
-    171          /* ===========================================================
-    172           * 7. @@@@ @@@ @@ @@ (Bluetooth_Task@@ @@)
-    173           * =========================================================== */
-
-   \                                 In section .text, align 2, keep-with-next
-    174          void BT_SendData(uint8_t data)
-    175          {
-   \                     BT_SendData: (+1)
-   \   00000000   0xB510             PUSH     {R4,LR}
-   \   00000002   0x0004             MOVS     R4,R0
-    176              // @@ @@@ @@@ @@@ @@
-    177              while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-   \                     ??BT_SendData_0: (+1)
-   \   00000004   0x2180             MOVS     R1,#+128
-   \   00000006   0x....             LDR.N    R0,??DataTable5_6  ;; 0x40004400
-   \   00000008   0x.... 0x....      BL       USART_GetFlagStatus
-   \   0000000C   0x2800             CMP      R0,#+0
-   \   0000000E   0xD0F9             BEQ.N    ??BT_SendData_0
-    178              // @@@ @@
-    179              USART_SendData(USART2, data);
-   \   00000010   0xB2E4             UXTB     R4,R4            ;; ZeroExt  R4,R4,#+24,#+24
-   \   00000012   0x0021             MOVS     R1,R4
-   \   00000014   0xB289             UXTH     R1,R1            ;; ZeroExt  R1,R1,#+16,#+16
-   \   00000016   0x....             LDR.N    R0,??DataTable5_6  ;; 0x40004400
-   \   00000018   0x.... 0x....      BL       USART_SendData
-    180          }
-   \   0000001C   0xBD10             POP      {R4,PC}          ;; return
-    181          
-    182          
-    183          /* ===========================================================
-    184           * 8. @@ @@ (RTOS @@)
-    185           * =========================================================== */
-
-   \                                 In section .text, align 2, keep-with-next
-    186          int main() {
+   \                                 In section .text, align 4, keep-with-next
+      8          int main(void) {
    \                     main: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    187          
-    188              SystemInit(); // @@ @@@ @@@
-   \   00000002   0x.... 0x....      BL       SystemInit
-    189          
-    190              // 1. @@@@ @@ @@ @@@ (RTOS @@ @ @@)
-    191              RCC_Configure();
-   \   00000006   0x.... 0x....      BL       RCC_Configure
-    192              GPIO_Configure();
-   \   0000000A   0x.... 0x....      BL       GPIO_Configure
-    193              
-    194              // [@@@@ @@@]
-    195              BT_USART_Init();
-   \   0000000E   0x.... 0x....      BL       BT_USART_Init
-    196              BT_NVIC_Configure(); // USART2 @@@@ @@
-   \   00000012   0x.... 0x....      BL       BT_NVIC_Configure
-    197          
-    198              // *[@@ @@]* @@ @@(TIM), @@ @@(EXTI/NVIC), PIR/LED @@@ @@ @@
-    199          
-    200              ADC_Configure(); // @@ @@ ADC @@@
-   \   00000016   0x.... 0x....      BL       ADC_Configure
-    201              DMA_Configure(); // ADC DMA @@@
-   \   0000001A   0x.... 0x....      BL       DMA_Configure
-    202          
-    203              LCD_Init();
-   \   0000001E   0x.... 0x....      BL       LCD_Init
-    204              // Touch_Configuration(); // @@ @@(TTP223)@ @@@@ @@ LCD @@ @@@ @@/@@@@
-    205              // Touch_Adjust();
-    206              LCD_Clear(WHITE);
-   \   00000022   0xF64F 0x70FF      MOVW     R0,#+65535
-   \   00000026   0x.... 0x....      BL       LCD_Clear
-    207          
-    208              // 2. RTOS @@@ @ @@
-    209              // @C/OS-III @@@ @ AppTaskStart @@@ @@ @@@ @@@@@@.
-    210              /*
-    211              OSInit();
-    212              
-    213              OSTaskCreate(
-    214                  (OS_TASK_PTR) AppTaskStart,
-    215                  (void *) 0,
-    216                  (OS_STK_PTR) &AppTaskStartStk[APP_TASK_START_STK_SIZE - 1],
-    217                  (OS_PRIO) APP_TASK_START_PRIO,
-    218              );
-    219              
-    220              OSStart(); // RTOS @@@@ @@
-    221              */
-    222          
-    223              // OSStart()@ @@@@@ RTOS @@ @@@@ @@@ @@@ @@ @@
-    224              while(1){
-   \                     ??main_0: (+1)
-   \   0000002A   0xE7FE             B.N      ??main_0
-    225                  // @@ @@@ @@(ADC @@, @@ @@, LCD/BT @@)@ RTOS @@@ @@@ @@@@@.
-    226              }
-    227          }
+   \   00000002   0xB08A             SUB      SP,SP,#+40
+      9              OS_ERR err;
+     10          
+     11              OSInit(&err);
+   \   00000004   0xA809             ADD      R0,SP,#+36
+   \   00000006   0x.... 0x....      BL       OSInit
+     12          
+     13              // Create the Start Task
+     14              OSTaskCreate((OS_TCB *)&AppTaskStartTCB,
+     15                           (CPU_CHAR *)"App Task Start",
+     16                           (OS_TASK_PTR)AppTaskStart,
+     17                           (void *)0,
+     18                           (OS_PRIO)3,
+     19                           (CPU_STK *)&AppTaskStartStk[0],
+     20                           (CPU_STK_SIZE)25,
+     21                           (CPU_STK_SIZE)256,
+     22                           (OS_MSG_QTY)0,
+     23                           (OS_TICK)0,
+     24                           (void *)0,
+     25                           (OS_OPT)(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+     26                           (OS_ERR *)&err);
+   \   0000000A   0xA809             ADD      R0,SP,#+36
+   \   0000000C   0x9008             STR      R0,[SP, #+32]
+   \   0000000E   0x2003             MOVS     R0,#+3
+   \   00000010   0x9007             STR      R0,[SP, #+28]
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x9006             STR      R0,[SP, #+24]
+   \   00000016   0x2000             MOVS     R0,#+0
+   \   00000018   0x9005             STR      R0,[SP, #+20]
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x9004             STR      R0,[SP, #+16]
+   \   0000001E   0xF44F 0x7080      MOV      R0,#+256
+   \   00000022   0x9003             STR      R0,[SP, #+12]
+   \   00000024   0x2019             MOVS     R0,#+25
+   \   00000026   0x9002             STR      R0,[SP, #+8]
+   \   00000028   0x4807             LDR.N    R0,??main_0
+   \   0000002A   0x9001             STR      R0,[SP, #+4]
+   \   0000002C   0x2003             MOVS     R0,#+3
+   \   0000002E   0x9000             STR      R0,[SP, #+0]
+   \   00000030   0x2300             MOVS     R3,#+0
+   \   00000032   0x4A06             LDR.N    R2,??main_0+0x4
+   \   00000034   0x4906             LDR.N    R1,??main_0+0x8
+   \   00000036   0x4807             LDR.N    R0,??main_0+0xC
+   \   00000038   0x.... 0x....      BL       OSTaskCreate
+     27          
+     28              OSStart(&err);
+   \   0000003C   0xA809             ADD      R0,SP,#+36
+   \   0000003E   0x.... 0x....      BL       OSStart
+     29          
+     30              return 0;
+   \   00000042   0x2000             MOVS     R0,#+0
+   \   00000044   0xB00B             ADD      SP,SP,#+44
+   \   00000046   0xBD00             POP      {PC}             ;; return
+   \                     ??main_0:
+   \   00000048   0x........         DC32     AppTaskStartStk
+   \   0000004C   0x........         DC32     AppTaskStart
+   \   00000050   0x........         DC32     ?_0
+   \   00000054   0x........         DC32     AppTaskStartTCB
+     31          }
 
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable5:
-   \   00000000   0x40010C00         DC32     0x40010c00
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable5_1:
-   \   00000000   0x40010800         DC32     0x40010800
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable5_2:
-   \   00000000   0x40012400         DC32     0x40012400
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable5_3:
-   \   00000000   0x40020008         DC32     0x40020008
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable5_4:
-   \   00000000   0x4001244C         DC32     0x4001244c
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable5_5:
-   \   00000000   0x........         DC32     ADC_Value
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable5_6:
-   \   00000000   0x40004400         DC32     0x40004400
+   \                                 In section .rodata, align 4
+   \                     ?_0:
+   \   00000000   0x41 0x70          DC8 "App Task Start"
+   \              0x70 0x20    
+   \              0x54 0x61    
+   \              0x73 0x6B    
+   \              0x20 0x53    
+   \              0x74 0x61    
+   \              0x72 0x74    
+   \              0x00         
+   \   0000000F   0x00               DC8 0
 
    Maximum stack usage in bytes:
 
    .cstack Function
    ------- --------
-      24   ADC_Configure
-        24   -> ADC_Cmd
-        24   -> ADC_DMACmd
-        24   -> ADC_GetCalibrationStatus
-        24   -> ADC_GetResetCalibrationStatus
-        24   -> ADC_Init
-        24   -> ADC_RegularChannelConfig
-        24   -> ADC_ResetCalibration
-        24   -> ADC_StartCalibration
-       8   BT_NVIC_Configure
-         8   -> NVIC_Init
-         8   -> NVIC_PriorityGroupConfig
-       8   BT_SendData
-         8   -> USART_GetFlagStatus
-         8   -> USART_SendData
-      24   BT_USART_Init
-        24   -> USART_Cmd
-        24   -> USART_ITConfig
-        24   -> USART_Init
-      48   DMA_Configure
-        48   -> DMA_Cmd
-        48   -> DMA_DeInit
-        48   -> DMA_Init
-       8   GPIO_Configure
-         8   -> GPIO_Init
-       8   RCC_Configure
-         8   -> RCC_AHBPeriphClockCmd
-         8   -> RCC_APB1PeriphClockCmd
-         8   -> RCC_APB2PeriphClockCmd
-       8   main
-         8   -> ADC_Configure
-         8   -> BT_NVIC_Configure
-         8   -> BT_USART_Init
-         8   -> DMA_Configure
-         8   -> GPIO_Configure
-         8   -> LCD_Clear
-         8   -> LCD_Init
-         8   -> RCC_Configure
-         8   -> SystemInit
+      48   main
+        48   -> OSInit
+        48   -> OSStart
+        48   -> OSTaskCreate
 
 
    Section sizes:
 
    Bytes  Function/Label
    -----  --------------
-       4  ??DataTable5
-       4  ??DataTable5_1
-       4  ??DataTable5_2
-       4  ??DataTable5_3
-       4  ??DataTable5_4
-       4  ??DataTable5_5
-       4  ??DataTable5_6
-     108  ADC_Configure
-       4  ADC_Value
-      42  BT_NVIC_Configure
-      30  BT_SendData
-      72  BT_USART_Init
-      80  DMA_Configure
-      70  GPIO_Configure
-      56  RCC_Configure
-      44  main
+      16  ?_0
+    1024  AppTaskStartStk
+     168  AppTaskStartTCB
+      88  main
 
  
-   4 bytes in section .bss
- 530 bytes in section .text
+ 1 192 bytes in section .bss
+    16 bytes in section .rodata
+    88 bytes in section .text
  
- 530 bytes of CODE memory
-   4 bytes of DATA memory
+    88 bytes of CODE  memory
+    16 bytes of CONST memory
+ 1 192 bytes of DATA  memory
 
 Errors: none
 Warnings: none

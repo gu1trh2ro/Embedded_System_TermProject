@@ -1,0 +1,489 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       20/Dec/2025  11:44:50
+# Copyright 1999-2018 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\os_cfg_app.c
+#    Command line =  
+#        -f C:\Users\pnu3\AppData\Local\Temp\EW27AA.tmp
+#        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\os_cfg_app.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
+#        -o
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj
+#        --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_clustering --no_scheduling --debug --endian=little
+#        --cpu=Cortex-M3 -e --fpu=None --dlib_config "C:\Program Files
+#        (x86)\IAR Systems\Embedded Workbench
+#        8.0\arm\INC\c\DLib_Config_Normal.h" -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\Startup\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\inc\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\src\
+#        -I C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\inc\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\LCD\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\uCOS-III\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-LIB\
+#        -Ol -I "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.0\arm\CMSIS\Core\Include\" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include\")
+#    Locale       =  C
+#    List file    =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List\os_cfg_app.lst
+#    Object file  =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj\os_cfg_app.o
+#
+###############################################################################
+
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\os_cfg_app.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                              uC/OS-III
+      4          *                                        The Real-Time Kernel
+      5          *
+      6          *                    Copyright 2009-2022 Silicon Laboratories Inc. www.silabs.com
+      7          *
+      8          *                                 SPDX-License-Identifier: APACHE-2.0
+      9          *
+     10          *               This software is subject to an open source license and is distributed by
+     11          *                Silicon Laboratories Inc. pursuant to the terms of the Apache License,
+     12          *                    Version 2.0 available at www.apache.org/licenses/LICENSE-2.0.
+     13          *
+     14          *********************************************************************************************************
+     15          */
+     16          
+     17          /*
+     18          *********************************************************************************************************
+     19          *                               OS CONFIGURATION (APPLICATION SPECIFICS)
+     20          *
+     21          * File    : os_cfg_app.c
+     22          * Version : V3.08.02
+     23          *********************************************************************************************************
+     24          * Note(s) : DO NOT CHANGE THIS FILE!
+     25          *********************************************************************************************************
+     26          */
+     27          
+     28          #define  MICRIUM_SOURCE
+     29          #include <os_cfg_app.h>
+     30          #include "os.h"
+     31          
+     32          #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+     33          const  CPU_CHAR  *os_cfg_app__c = "$Id: $";
+     34          #endif
+     35          
+     36          #if (OS_CFG_TASK_IDLE_EN > 0u)
+     37          #define  OS_CFG_IDLE_TASK_STK_LIMIT      ((OS_CFG_IDLE_TASK_STK_SIZE  * OS_CFG_TASK_STK_LIMIT_PCT_EMPTY) / 100u)
+     38          #endif
+     39          
+     40          #if (OS_CFG_STAT_TASK_EN > 0u)
+     41          #define  OS_CFG_STAT_TASK_STK_LIMIT      ((OS_CFG_STAT_TASK_STK_SIZE  * OS_CFG_TASK_STK_LIMIT_PCT_EMPTY) / 100u)
+     42          #endif
+     43          
+     44          #if (OS_CFG_TMR_EN > 0u)
+     45          #define  OS_CFG_TMR_TASK_STK_LIMIT       ((OS_CFG_TMR_TASK_STK_SIZE   * OS_CFG_TASK_STK_LIMIT_PCT_EMPTY) / 100u)
+     46          #endif
+     47          
+     48          /*
+     49          ************************************************************************************************************************
+     50          *                                                    DATA STORAGE
+     51          ************************************************************************************************************************
+     52          */
+     53          
+     54          #if (OS_CFG_TASK_IDLE_EN > 0u)
+
+   \                                 In section .bss, align 4
+     55          CPU_STK        OSCfg_IdleTaskStk   [OS_CFG_IDLE_TASK_STK_SIZE];
+   \                     OSCfg_IdleTaskStk:
+   \   00000000                      DS8 256
+     56          #endif
+     57          
+     58          #if (OS_CFG_ISR_STK_SIZE > 0u)
+
+   \                                 In section .bss, align 4
+     59          CPU_STK        OSCfg_ISRStk        [OS_CFG_ISR_STK_SIZE];
+   \                     OSCfg_ISRStk:
+   \   00000000                      DS8 512
+     60          #endif
+     61          
+     62          #if (OS_MSG_EN > 0u)
+
+   \                                 In section .bss, align 4
+     63          OS_MSG         OSCfg_MsgPool       [OS_CFG_MSG_POOL_SIZE];
+   \                     OSCfg_MsgPool:
+   \   00000000                      DS8 384
+     64          #endif
+     65          
+     66          #if (OS_CFG_STAT_TASK_EN > 0u)
+
+   \                                 In section .bss, align 4
+     67          CPU_STK        OSCfg_StatTaskStk   [OS_CFG_STAT_TASK_STK_SIZE];
+   \                     OSCfg_StatTaskStk:
+   \   00000000                      DS8 400
+     68          #endif
+     69          
+     70          #if (OS_CFG_TMR_EN > 0u)
+
+   \                                 In section .bss, align 4
+     71          CPU_STK        OSCfg_TmrTaskStk    [OS_CFG_TMR_TASK_STK_SIZE];
+   \                     OSCfg_TmrTaskStk:
+   \   00000000                      DS8 512
+     72          #endif
+     73          
+     74          /*
+     75          ************************************************************************************************************************
+     76          *                                                      CONSTANTS
+     77          ************************************************************************************************************************
+     78          */
+     79          
+     80          #if (OS_CFG_TASK_IDLE_EN > 0u)
+
+   \                                 In section .rodata, align 4
+     81          CPU_STK      * const  OSCfg_IdleTaskStkBasePtr   = &OSCfg_IdleTaskStk[0];
+   \                     OSCfg_IdleTaskStkBasePtr:
+   \   00000000   0x........         DC32 OSCfg_IdleTaskStk
+
+   \                                 In section .rodata, align 4
+     82          CPU_STK_SIZE   const  OSCfg_IdleTaskStkLimit     =  OS_CFG_IDLE_TASK_STK_LIMIT;
+   \                     OSCfg_IdleTaskStkLimit:
+   \   00000000   0x00000006         DC32 6
+
+   \                                 In section .rodata, align 4
+     83          CPU_STK_SIZE   const  OSCfg_IdleTaskStkSize      =  OS_CFG_IDLE_TASK_STK_SIZE;
+   \                     OSCfg_IdleTaskStkSize:
+   \   00000000   0x00000040         DC32 64
+
+   \                                 In section .rodata, align 4
+     84          CPU_INT32U     const  OSCfg_IdleTaskStkSizeRAM   =  sizeof(OSCfg_IdleTaskStk);
+   \                     OSCfg_IdleTaskStkSizeRAM:
+   \   00000000   0x00000100         DC32 256
+     85          #else
+     86          CPU_STK      * const  OSCfg_IdleTaskStkBasePtr   = (CPU_STK *)0;
+     87          CPU_STK_SIZE   const  OSCfg_IdleTaskStkLimit     =            0u;
+     88          CPU_STK_SIZE   const  OSCfg_IdleTaskStkSize      =            0u;
+     89          CPU_INT32U     const  OSCfg_IdleTaskStkSizeRAM   =            0u;
+     90          #endif
+     91          
+     92          #if (OS_CFG_ISR_STK_SIZE > 0u)
+
+   \                                 In section .rodata, align 4
+     93          CPU_STK      * const  OSCfg_ISRStkBasePtr        = &OSCfg_ISRStk[0];
+   \                     OSCfg_ISRStkBasePtr:
+   \   00000000   0x........         DC32 OSCfg_ISRStk
+
+   \                                 In section .rodata, align 4
+     94          CPU_STK_SIZE   const  OSCfg_ISRStkSize           =  OS_CFG_ISR_STK_SIZE;
+   \                     OSCfg_ISRStkSize:
+   \   00000000   0x00000080         DC32 128
+
+   \                                 In section .rodata, align 4
+     95          CPU_INT32U     const  OSCfg_ISRStkSizeRAM        =  sizeof(OSCfg_ISRStk);
+   \                     OSCfg_ISRStkSizeRAM:
+   \   00000000   0x00000200         DC32 512
+     96          #else
+     97          CPU_STK      * const  OSCfg_ISRStkBasePtr        =  (CPU_STK *)0;
+     98          CPU_STK_SIZE   const  OSCfg_ISRStkSize           =             0u;
+     99          CPU_INT32U     const  OSCfg_ISRStkSizeRAM        =             0u;
+    100          #endif
+    101          
+    102          
+    103          #if (OS_MSG_EN > 0u)
+
+   \                                 In section .rodata, align 2
+    104          OS_MSG_SIZE    const  OSCfg_MsgPoolSize          =  OS_CFG_MSG_POOL_SIZE;
+   \                     OSCfg_MsgPoolSize:
+   \   00000000   0x0020             DC16 32
+
+   \                                 In section .rodata, align 4
+    105          CPU_INT32U     const  OSCfg_MsgPoolSizeRAM       =  sizeof(OSCfg_MsgPool);
+   \                     OSCfg_MsgPoolSizeRAM:
+   \   00000000   0x00000180         DC32 384
+
+   \                                 In section .rodata, align 4
+    106          OS_MSG       * const  OSCfg_MsgPoolBasePtr       = &OSCfg_MsgPool[0];
+   \                     OSCfg_MsgPoolBasePtr:
+   \   00000000   0x........         DC32 OSCfg_MsgPool
+    107          #else
+    108          OS_MSG_SIZE    const  OSCfg_MsgPoolSize          =           0u;
+    109          CPU_INT32U     const  OSCfg_MsgPoolSizeRAM       =           0u;
+    110          OS_MSG       * const  OSCfg_MsgPoolBasePtr       = (OS_MSG *)0;
+    111          #endif
+    112          
+    113          
+    114          #if (OS_CFG_STAT_TASK_EN > 0u)
+
+   \                                 In section .rodata, align 1
+    115          OS_PRIO        const  OSCfg_StatTaskPrio         =  OS_CFG_STAT_TASK_PRIO;
+   \                     OSCfg_StatTaskPrio:
+   \   00000000   0x3E               DC8 62
+
+   \                                 In section .rodata, align 4
+    116          OS_RATE_HZ     const  OSCfg_StatTaskRate_Hz      =  OS_CFG_STAT_TASK_RATE_HZ;
+   \                     OSCfg_StatTaskRate_Hz:
+   \   00000000   0x0000000A         DC32 10
+
+   \                                 In section .rodata, align 4
+    117          CPU_STK      * const  OSCfg_StatTaskStkBasePtr   = &OSCfg_StatTaskStk[0];
+   \                     OSCfg_StatTaskStkBasePtr:
+   \   00000000   0x........         DC32 OSCfg_StatTaskStk
+
+   \                                 In section .rodata, align 4
+    118          CPU_STK_SIZE   const  OSCfg_StatTaskStkLimit     =  OS_CFG_STAT_TASK_STK_LIMIT;
+   \                     OSCfg_StatTaskStkLimit:
+   \   00000000   0x0000000A         DC32 10
+
+   \                                 In section .rodata, align 4
+    119          CPU_STK_SIZE   const  OSCfg_StatTaskStkSize      =  OS_CFG_STAT_TASK_STK_SIZE;
+   \                     OSCfg_StatTaskStkSize:
+   \   00000000   0x00000064         DC32 100
+
+   \                                 In section .rodata, align 4
+    120          CPU_INT32U     const  OSCfg_StatTaskStkSizeRAM   =  sizeof(OSCfg_StatTaskStk);
+   \                     OSCfg_StatTaskStkSizeRAM:
+   \   00000000   0x00000190         DC32 400
+    121          #else
+    122          OS_PRIO        const  OSCfg_StatTaskPrio         =            0u;
+    123          OS_RATE_HZ     const  OSCfg_StatTaskRate_Hz      =            0u;
+    124          CPU_STK      * const  OSCfg_StatTaskStkBasePtr   = (CPU_STK *)0;
+    125          CPU_STK_SIZE   const  OSCfg_StatTaskStkLimit     =            0u;
+    126          CPU_STK_SIZE   const  OSCfg_StatTaskStkSize      =            0u;
+    127          CPU_INT32U     const  OSCfg_StatTaskStkSizeRAM   =            0u;
+    128          #endif
+    129          
+    130          
+
+   \                                 In section .rodata, align 4
+    131          CPU_STK_SIZE   const  OSCfg_StkSizeMin           =  OS_CFG_STK_SIZE_MIN;
+   \                     OSCfg_StkSizeMin:
+   \   00000000   0x00000040         DC32 64
+    132          
+    133          
+    134          #if (OS_CFG_TICK_EN > 0u)
+
+   \                                 In section .rodata, align 4
+    135          OS_RATE_HZ     const  OSCfg_TickRate_Hz          =  OS_CFG_TICK_RATE_HZ;
+   \                     OSCfg_TickRate_Hz:
+   \   00000000   0x000003E8         DC32 1000
+    136          #else
+    137          OS_RATE_HZ     const  OSCfg_TickRate_Hz          =  0u;
+    138          #endif
+    139          
+    140          
+    141          #if (OS_CFG_TMR_EN > 0u)
+
+   \                                 In section .rodata, align 1
+    142          OS_PRIO        const  OSCfg_TmrTaskPrio          =  OS_CFG_TMR_TASK_PRIO;
+   \                     OSCfg_TmrTaskPrio:
+   \   00000000   0x3D               DC8 61
+
+   \                                 In section .rodata, align 4
+    143          OS_RATE_HZ     const  OSCfg_TmrTaskRate_Hz       =  OS_CFG_TMR_TASK_RATE_HZ;
+   \                     OSCfg_TmrTaskRate_Hz:
+   \   00000000   0x0000000A         DC32 10
+
+   \                                 In section .rodata, align 4
+    144          CPU_STK      * const  OSCfg_TmrTaskStkBasePtr    = &OSCfg_TmrTaskStk[0];
+   \                     OSCfg_TmrTaskStkBasePtr:
+   \   00000000   0x........         DC32 OSCfg_TmrTaskStk
+
+   \                                 In section .rodata, align 4
+    145          CPU_STK_SIZE   const  OSCfg_TmrTaskStkLimit      =  OS_CFG_TMR_TASK_STK_LIMIT;
+   \                     OSCfg_TmrTaskStkLimit:
+   \   00000000   0x0000000C         DC32 12
+
+   \                                 In section .rodata, align 4
+    146          CPU_STK_SIZE   const  OSCfg_TmrTaskStkSize       =  OS_CFG_TMR_TASK_STK_SIZE;
+   \                     OSCfg_TmrTaskStkSize:
+   \   00000000   0x00000080         DC32 128
+
+   \                                 In section .rodata, align 4
+    147          CPU_INT32U     const  OSCfg_TmrTaskStkSizeRAM    =  sizeof(OSCfg_TmrTaskStk);
+   \                     OSCfg_TmrTaskStkSizeRAM:
+   \   00000000   0x00000200         DC32 512
+    148          #else
+    149          OS_PRIO        const  OSCfg_TmrTaskPrio          =             0u;
+    150          OS_RATE_HZ     const  OSCfg_TmrTaskRate_Hz       =             0u;
+    151          CPU_STK      * const  OSCfg_TmrTaskStkBasePtr    =  (CPU_STK *)0;
+    152          CPU_STK_SIZE   const  OSCfg_TmrTaskStkLimit      =             0u;
+    153          CPU_STK_SIZE   const  OSCfg_TmrTaskStkSize       =             0u;
+    154          CPU_INT32U     const  OSCfg_TmrTaskStkSizeRAM    =             0u;
+    155          #endif
+    156          
+    157          
+    158          /*
+    159          ************************************************************************************************************************
+    160          *                                         TOTAL SIZE OF APPLICATION CONFIGURATION
+    161          ************************************************************************************************************************
+    162          */
+    163          
+
+   \                                 In section .rodata, align 4
+    164          CPU_INT32U     const  OSCfg_DataSizeRAM          = 0u
+   \                     OSCfg_DataSizeRAM:
+   \   00000000   0x00000810         DC32 2064
+    165          
+    166          #if (OS_CFG_TASK_IDLE_EN > 0u)
+    167                                                           + sizeof(OSCfg_IdleTaskStk)
+    168          #endif
+    169          
+    170          #if (OS_MSG_EN > 0u)
+    171                                                           + sizeof(OSCfg_MsgPool)
+    172          #endif
+    173          
+    174          #if (OS_CFG_STAT_TASK_EN > 0u)
+    175                                                           + sizeof(OSCfg_StatTaskStk)
+    176          #endif
+    177          
+    178          #if (OS_CFG_TMR_EN > 0u)
+    179                                                           + sizeof(OSCfg_TmrTaskStk)
+    180          #endif
+    181          
+    182          #if (OS_CFG_ISR_STK_SIZE > 0u)
+    183                                                           + sizeof(OSCfg_ISRStk)
+    184          #endif
+    185          
+    186                                                           + 0u;
+    187          
+    188          
+    189          
+    190          /*
+    191          ************************************************************************************************************************
+    192          *                                             OS CONFIGURATION INITIALIZATION
+    193          *
+    194          * Description: This function is used to make sure that debug variables that are unused in the application are not
+    195          *              optimized away.  This function might not be necessary for all compilers.  In this case, you should simply
+    196          *              DELETE the code in this function while still leaving the declaration of the function itself.
+    197          *
+    198          * Arguments  : none
+    199          *
+    200          * Returns    : none
+    201          *
+    202          * Note(s)    : (1) This code doesn't do anything, it simply prevents the compiler from optimizing out the 'const'
+    203          *                  variables which are declared in this file.
+    204          *              (2) You may decide to 'compile out' the code (by using #if 0/#endif) INSIDE the function if your compiler
+    205          *                  DOES NOT optimize out the 'const' variables above.
+    206          ************************************************************************************************************************
+    207          */
+    208          
+
+   \                                 In section .text, align 2, keep-with-next
+    209          void  OSCfg_Init (void)
+    210          {
+    211              (void)OSCfg_DataSizeRAM;
+    212          
+    213          #if (OS_CFG_TASK_IDLE_EN > 0u)
+    214              (void)OSCfg_IdleTaskStkBasePtr;
+    215              (void)OSCfg_IdleTaskStkLimit;
+    216              (void)OSCfg_IdleTaskStkSize;
+    217              (void)OSCfg_IdleTaskStkSizeRAM;
+    218          #endif
+    219          
+    220              (void)OSCfg_ISRStkBasePtr;
+    221              (void)OSCfg_ISRStkSize;
+    222              (void)OSCfg_ISRStkSizeRAM;
+    223          
+    224          #if (OS_MSG_EN > 0u)
+    225              (void)OSCfg_MsgPoolSize;
+    226              (void)OSCfg_MsgPoolSizeRAM;
+    227              (void)OSCfg_MsgPoolBasePtr;
+    228          #endif
+    229          
+    230          #if (OS_CFG_STAT_TASK_EN > 0u)
+    231              (void)OSCfg_StatTaskPrio;
+    232              (void)OSCfg_StatTaskRate_Hz;
+    233              (void)OSCfg_StatTaskStkBasePtr;
+    234              (void)OSCfg_StatTaskStkLimit;
+    235              (void)OSCfg_StatTaskStkSize;
+    236              (void)OSCfg_StatTaskStkSizeRAM;
+    237          #endif
+    238          
+    239              (void)OSCfg_StkSizeMin;
+    240          
+    241          #if (OS_CFG_TICK_EN > 0u)
+    242              (void)OSCfg_TickRate_Hz;
+    243          #endif
+    244          
+    245          #if (OS_CFG_TMR_EN > 0u)
+    246              (void)OSCfg_TmrTaskPrio;
+    247              (void)OSCfg_TmrTaskRate_Hz;
+    248              (void)OSCfg_TmrTaskStkBasePtr;
+    249              (void)OSCfg_TmrTaskStkLimit;
+    250              (void)OSCfg_TmrTaskStkSize;
+    251              (void)OSCfg_TmrTaskStkSizeRAM;
+    252          #endif
+    253          }
+   \                     OSCfg_Init: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   OSCfg_Init
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  OSCfg_DataSizeRAM
+     512  OSCfg_ISRStk
+       4  OSCfg_ISRStkBasePtr
+       4  OSCfg_ISRStkSize
+       4  OSCfg_ISRStkSizeRAM
+     256  OSCfg_IdleTaskStk
+       4  OSCfg_IdleTaskStkBasePtr
+       4  OSCfg_IdleTaskStkLimit
+       4  OSCfg_IdleTaskStkSize
+       4  OSCfg_IdleTaskStkSizeRAM
+       2  OSCfg_Init
+     384  OSCfg_MsgPool
+       4  OSCfg_MsgPoolBasePtr
+       2  OSCfg_MsgPoolSize
+       4  OSCfg_MsgPoolSizeRAM
+       1  OSCfg_StatTaskPrio
+       4  OSCfg_StatTaskRate_Hz
+     400  OSCfg_StatTaskStk
+       4  OSCfg_StatTaskStkBasePtr
+       4  OSCfg_StatTaskStkLimit
+       4  OSCfg_StatTaskStkSize
+       4  OSCfg_StatTaskStkSizeRAM
+       4  OSCfg_StkSizeMin
+       4  OSCfg_TickRate_Hz
+       1  OSCfg_TmrTaskPrio
+       4  OSCfg_TmrTaskRate_Hz
+     512  OSCfg_TmrTaskStk
+       4  OSCfg_TmrTaskStkBasePtr
+       4  OSCfg_TmrTaskStkLimit
+       4  OSCfg_TmrTaskStkSize
+       4  OSCfg_TmrTaskStkSizeRAM
+
+ 
+ 2 064 bytes in section .bss
+    92 bytes in section .rodata
+     2 bytes in section .text
+ 
+     2 bytes of CODE  memory
+    92 bytes of CONST memory
+ 2 064 bytes of DATA  memory
+
+Errors: none
+Warnings: none

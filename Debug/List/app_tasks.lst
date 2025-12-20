@@ -1,0 +1,749 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       20/Dec/2025  11:44:49
+# Copyright 1999-2018 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
+#    Command line =  
+#        -f C:\Users\pnu3\AppData\Local\Temp\EW230D.tmp
+#        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
+#        -o
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj
+#        --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_clustering --no_scheduling --debug --endian=little
+#        --cpu=Cortex-M3 -e --fpu=None --dlib_config "C:\Program Files
+#        (x86)\IAR Systems\Embedded Workbench
+#        8.0\arm\INC\c\DLib_Config_Normal.h" -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\Startup\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\inc\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\src\
+#        -I C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\inc\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\LCD\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\uCOS-III\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-LIB\
+#        -Ol -I "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.0\arm\CMSIS\Core\Include\" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include\")
+#    Locale       =  C
+#    List file    =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List\app_tasks.lst
+#    Object file  =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj\app_tasks.o
+#
+###############################################################################
+
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
+      1          #include "app_tasks.h"
+      2          #include "includes.h"
+      3          #include "globals.h"
+      4          #include "bsp.h"
+      5          
+      6          // Global Handles
+
+   \                                 In section .bss, align 4
+      7          OS_Q PirDataQ;
+   \                     PirDataQ:
+   \   00000000                      DS8 24
+
+   \                                 In section .bss, align 4
+      8          OS_Q StateQ;
+   \                     StateQ:
+   \   00000000                      DS8 24
+
+   \                                 In section .bss, align 4
+      9          OS_Q ServoQ;
+   \                     ServoQ:
+   \   00000000                      DS8 24
+
+   \                                 In section .bss, align 4
+     10          OS_Q BluetoothRxQ;
+   \                     BluetoothRxQ:
+   \   00000000                      DS8 24
+     11          
+
+   \                                 In section .rodata, align 1
+     12          const uint8_t MSG_TOUCH_RESET_CODE = 255;
+   \                     MSG_TOUCH_RESET_CODE:
+   \   00000000   0xFF               DC8 255
+     13          
+     14          // Task Stacks & TCBs (Defined here or extern if needed elsewhere)
+
+   \                                 In section .bss, align 4
+     15          OS_TCB PirTaskTCB;
+   \                     PirTaskTCB:
+   \   00000000                      DS8 168
+
+   \                                 In section .bss, align 4
+     16          CPU_STK PirTaskStk[128];
+   \                     PirTaskStk:
+   \   00000000                      DS8 512
+     17          
+
+   \                                 In section .bss, align 4
+     18          OS_TCB StatusTaskTCB;
+   \                     StatusTaskTCB:
+   \   00000000                      DS8 168
+
+   \                                 In section .bss, align 4
+     19          CPU_STK StatusTaskStk[128];
+   \                     StatusTaskStk:
+   \   00000000                      DS8 512
+     20          
+
+   \                                 In section .bss, align 4
+     21          OS_TCB ServoTaskTCB;
+   \                     ServoTaskTCB:
+   \   00000000                      DS8 168
+
+   \                                 In section .bss, align 4
+     22          CPU_STK ServoTaskStk[128];
+   \                     ServoTaskStk:
+   \   00000000                      DS8 512
+     23          
+     24          // Variables
+
+   \                                 In section .bss, align 4
+     25          volatile uint32_t idle_counter = 0;
+   \                     idle_counter:
+   \   00000000                      DS8 4
+
+   \                                 In section .bss, align 4
+     26          volatile uint32_t suspicious_counter = 0;
+   \                     suspicious_counter:
+   \   00000000                      DS8 4
+
+   \                                 In section .data, align 1
+     27          volatile uint8_t current_state = 1; // 1: Occupied, 2: Vacant, 3: Suspicious
+   \                     current_state:
+   \   00000000   0x01               DC8 1
+     28          
+     29          // --- Tasks ---
+     30          
+
+   \                                 In section .text, align 2, keep-with-next
+     31          void PIR_Task(void *p_arg) {
+   \                     PIR_Task: (+1)
+   \   00000000   0xB5E0             PUSH     {R5-R7,LR}
+     32          	OS_ERR err;
+     33              uint8_t pir_val = 0;
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0xF88D 0x0008      STRB     R0,[SP, #+8]
+     34              
+     35          	while(1) {
+     36                  pir_val = PIR_Read();
+   \                     ??PIR_Task_0: (+1)
+   \   00000008   0x.... 0x....      BL       PIR_Read
+   \   0000000C   0xF88D 0x0008      STRB     R0,[SP, #+8]
+     37                  if (pir_val == 1) { // Motion
+   \   00000010   0xF89D 0x0008      LDRB     R0,[SP, #+8]
+   \   00000014   0x2801             CMP      R0,#+1
+   \   00000016   0xD108             BNE.N    ??PIR_Task_1
+     38                       OSQPost(&PirDataQ, &pir_val, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+   \   00000018   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   0000001C   0x9000             STR      R0,[SP, #+0]
+   \   0000001E   0x2300             MOVS     R3,#+0
+   \   00000020   0x2201             MOVS     R2,#+1
+   \   00000022   0xA902             ADD      R1,SP,#+8
+   \   00000024   0x....             LDR.N    R0,??DataTable3
+   \   00000026   0x.... 0x....      BL       OSQPost
+     39                  }
+     40          		OSTimeDlyHMSM(0, 0, 0, 50, OS_OPT_TIME_HMSM_STRICT, &err);
+   \                     ??PIR_Task_1: (+1)
+   \   0000002A   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   0000002E   0x9001             STR      R0,[SP, #+4]
+   \   00000030   0x2000             MOVS     R0,#+0
+   \   00000032   0x9000             STR      R0,[SP, #+0]
+   \   00000034   0x2332             MOVS     R3,#+50
+   \   00000036   0x2200             MOVS     R2,#+0
+   \   00000038   0x2100             MOVS     R1,#+0
+   \   0000003A   0x2000             MOVS     R0,#+0
+   \   0000003C   0x.... 0x....      BL       OSTimeDlyHMSM
+   \   00000040   0xE7E2             B.N      ??PIR_Task_0
+     41          	}
+     42          }
+     43          
+
+   \                                 In section .text, align 2, keep-with-next
+     44          void Status_Task(void *p_arg) {
+   \                     Status_Task: (+1)
+   \   00000000   0xB5E0             PUSH     {R5-R7,LR}
+     45          	OS_ERR err;
+     46              void *msg;
+                           ^
+Warning[Pe550]: variable "msg" was set but never used
+     47              OS_MSG_SIZE size;
+     48              uint16_t light_val = 0;
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0xE007             B.N      ??Status_Task_0
+     49              
+     50          	while(1) {
+     51                  // Wait for PIR data or Timeout (1s)
+     52                  msg = OSQPend(&PirDataQ, 1000, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
+     53          
+     54                  if (err == OS_ERR_NONE) {
+     55                      // Motion Detected -> Occupied
+     56                      idle_counter = 0;
+     57                      suspicious_counter = 0;
+     58                      if (current_state != 1) {
+     59                          current_state = 1;
+     60                          // Notify Display/BT
+     61                      }
+     62                  } else if (err == OS_ERR_TIMEOUT) {
+     63                      // No Motion for 1 sec
+     64                      idle_counter++;
+     65                      
+     66                      if (current_state == 1 && idle_counter >= 10) { // 10s demo (req 10min)
+     67                           // Check Light
+     68                           light_val = LightSensor_Read();
+     69                           if (light_val > 3500) { // Bright -> Suspicious
+     70                               current_state = 3;
+     71                           } else { // Dark -> Vacant
+     72                               current_state = 2;
+     73                           }
+     74                           // Reset counters? No, keep logic 
+     75                      }
+     76                      
+     77                      if (current_state == 3) {
+     78                          suspicious_counter++;
+     79                          if (suspicious_counter > 15) { // Demo threshold
+     80                              // Trigger Servo
+     81                              uint8_t servo_cmd = 1;
+     82                              OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err);
+     83                              suspicious_counter = 0;
+     84                          }
+     85                      }
+     86                  }
+     87                  
+     88                  // Output State to LED/LCD
+     89                  if(current_state == 1) {
+     90                      LED_Set(1, 1); LED_Set(2, 0); // Green ON
+   \                     ??Status_Task_1: (+1)
+   \   00000006   0x2101             MOVS     R1,#+1
+   \   00000008   0x2001             MOVS     R0,#+1
+   \   0000000A   0x.... 0x....      BL       LED_Set
+   \   0000000E   0x2100             MOVS     R1,#+0
+   \   00000010   0x2002             MOVS     R0,#+2
+   \   00000012   0x.... 0x....      BL       LED_Set
+     91                  } else if (current_state == 2) {
+   \                     ??Status_Task_0: (+1)
+   \   00000016   0xA802             ADD      R0,SP,#+8
+   \   00000018   0x9001             STR      R0,[SP, #+4]
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x9000             STR      R0,[SP, #+0]
+   \   0000001E   0xF10D 0x030A      ADD      R3,SP,#+10
+   \   00000022   0x2200             MOVS     R2,#+0
+   \   00000024   0xF44F 0x717A      MOV      R1,#+1000
+   \   00000028   0x....             LDR.N    R0,??DataTable3
+   \   0000002A   0x.... 0x....      BL       OSQPend
+   \   0000002E   0xF8BD 0x0008      LDRH     R0,[SP, #+8]
+   \   00000032   0x2800             CMP      R0,#+0
+   \   00000034   0xD10D             BNE.N    ??Status_Task_2
+   \   00000036   0x2000             MOVS     R0,#+0
+   \   00000038   0x....             LDR.N    R1,??DataTable3_1
+   \   0000003A   0x6008             STR      R0,[R1, #+0]
+   \   0000003C   0x2000             MOVS     R0,#+0
+   \   0000003E   0x....             LDR.N    R1,??DataTable3_2
+   \   00000040   0x6008             STR      R0,[R1, #+0]
+   \   00000042   0x....             LDR.N    R0,??DataTable3_3
+   \   00000044   0x7800             LDRB     R0,[R0, #+0]
+   \   00000046   0x2801             CMP      R0,#+1
+   \   00000048   0xD03F             BEQ.N    ??Status_Task_3
+   \   0000004A   0x2001             MOVS     R0,#+1
+   \   0000004C   0x....             LDR.N    R1,??DataTable3_3
+   \   0000004E   0x7008             STRB     R0,[R1, #+0]
+   \   00000050   0xE03B             B.N      ??Status_Task_3
+   \                     ??Status_Task_2: (+1)
+   \   00000052   0xF8BD 0x0008      LDRH     R0,[SP, #+8]
+   \   00000056   0xF247 0x21D9      MOVW     R1,#+29401
+   \   0000005A   0x4288             CMP      R0,R1
+   \   0000005C   0xD135             BNE.N    ??Status_Task_3
+   \   0000005E   0x....             LDR.N    R0,??DataTable3_1
+   \   00000060   0x6800             LDR      R0,[R0, #+0]
+   \   00000062   0x1C40             ADDS     R0,R0,#+1
+   \   00000064   0x....             LDR.N    R1,??DataTable3_1
+   \   00000066   0x6008             STR      R0,[R1, #+0]
+   \   00000068   0x....             LDR.N    R0,??DataTable3_3
+   \   0000006A   0x7800             LDRB     R0,[R0, #+0]
+   \   0000006C   0x2801             CMP      R0,#+1
+   \   0000006E   0xD111             BNE.N    ??Status_Task_4
+   \   00000070   0x....             LDR.N    R0,??DataTable3_1
+   \   00000072   0x6800             LDR      R0,[R0, #+0]
+   \   00000074   0x280A             CMP      R0,#+10
+   \   00000076   0xD30D             BCC.N    ??Status_Task_4
+   \   00000078   0x.... 0x....      BL       LightSensor_Read
+   \   0000007C   0xB280             UXTH     R0,R0            ;; ZeroExt  R0,R0,#+16,#+16
+   \   0000007E   0xF640 0x51AD      MOVW     R1,#+3501
+   \   00000082   0x4288             CMP      R0,R1
+   \   00000084   0xDB03             BLT.N    ??Status_Task_5
+   \   00000086   0x2003             MOVS     R0,#+3
+   \   00000088   0x....             LDR.N    R1,??DataTable3_3
+   \   0000008A   0x7008             STRB     R0,[R1, #+0]
+   \   0000008C   0xE002             B.N      ??Status_Task_4
+   \                     ??Status_Task_5: (+1)
+   \   0000008E   0x2002             MOVS     R0,#+2
+   \   00000090   0x....             LDR.N    R1,??DataTable3_3
+   \   00000092   0x7008             STRB     R0,[R1, #+0]
+   \                     ??Status_Task_4: (+1)
+   \   00000094   0x....             LDR.N    R0,??DataTable3_3
+   \   00000096   0x7800             LDRB     R0,[R0, #+0]
+   \   00000098   0x2803             CMP      R0,#+3
+   \   0000009A   0xD116             BNE.N    ??Status_Task_3
+   \   0000009C   0x....             LDR.N    R0,??DataTable3_2
+   \   0000009E   0x6800             LDR      R0,[R0, #+0]
+   \   000000A0   0x1C40             ADDS     R0,R0,#+1
+   \   000000A2   0x....             LDR.N    R1,??DataTable3_2
+   \   000000A4   0x6008             STR      R0,[R1, #+0]
+   \   000000A6   0x....             LDR.N    R0,??DataTable3_2
+   \   000000A8   0x6800             LDR      R0,[R0, #+0]
+   \   000000AA   0x2810             CMP      R0,#+16
+   \   000000AC   0xD30D             BCC.N    ??Status_Task_3
+   \   000000AE   0x2001             MOVS     R0,#+1
+   \   000000B0   0xF88D 0x0004      STRB     R0,[SP, #+4]
+   \   000000B4   0xA802             ADD      R0,SP,#+8
+   \   000000B6   0x9000             STR      R0,[SP, #+0]
+   \   000000B8   0x2300             MOVS     R3,#+0
+   \   000000BA   0x2201             MOVS     R2,#+1
+   \   000000BC   0xA901             ADD      R1,SP,#+4
+   \   000000BE   0x....             LDR.N    R0,??DataTable3_4
+   \   000000C0   0x.... 0x....      BL       OSQPost
+   \   000000C4   0x2000             MOVS     R0,#+0
+   \   000000C6   0x....             LDR.N    R1,??DataTable3_2
+   \   000000C8   0x6008             STR      R0,[R1, #+0]
+   \                     ??Status_Task_3: (+1)
+   \   000000CA   0x....             LDR.N    R0,??DataTable3_3
+   \   000000CC   0x7800             LDRB     R0,[R0, #+0]
+   \   000000CE   0x2801             CMP      R0,#+1
+   \   000000D0   0xD099             BEQ.N    ??Status_Task_1
+   \   000000D2   0x....             LDR.N    R0,??DataTable3_3
+   \   000000D4   0x7800             LDRB     R0,[R0, #+0]
+   \   000000D6   0x2802             CMP      R0,#+2
+   \   000000D8   0xD108             BNE.N    ??Status_Task_6
+     92                      LED_Set(1, 0); LED_Set(2, 0); // All OFF
+   \   000000DA   0x2100             MOVS     R1,#+0
+   \   000000DC   0x2001             MOVS     R0,#+1
+   \   000000DE   0x.... 0x....      BL       LED_Set
+   \   000000E2   0x2100             MOVS     R1,#+0
+   \   000000E4   0x2002             MOVS     R0,#+2
+   \   000000E6   0x.... 0x....      BL       LED_Set
+   \   000000EA   0xE794             B.N      ??Status_Task_0
+     93                  } else {
+     94                      LED_Set(1, 0); LED_Set(2, 1); // Red ON
+   \                     ??Status_Task_6: (+1)
+   \   000000EC   0x2100             MOVS     R1,#+0
+   \   000000EE   0x2001             MOVS     R0,#+1
+   \   000000F0   0x.... 0x....      BL       LED_Set
+   \   000000F4   0x2101             MOVS     R1,#+1
+   \   000000F6   0x2002             MOVS     R0,#+2
+   \   000000F8   0x.... 0x....      BL       LED_Set
+   \   000000FC   0xE78B             B.N      ??Status_Task_0
+     95                  }
+     96          	}
+     97          }
+     98          
+
+   \                                 In section .text, align 2, keep-with-next
+     99          void Servo_Task(void *p_arg) {
+   \                     Servo_Task: (+1)
+   \   00000000   0xB5E0             PUSH     {R5-R7,LR}
+    100              OS_ERR err;
+    101              void *msg;
+                           ^
+Warning[Pe550]: variable "msg" was set but never used
+    102              OS_MSG_SIZE size;
+    103              
+    104              while(1) {
+    105                  msg = OSQPend(&ServoQ, 0, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
+   \                     ??Servo_Task_0: (+1)
+   \   00000002   0xA802             ADD      R0,SP,#+8
+   \   00000004   0x9001             STR      R0,[SP, #+4]
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0x9000             STR      R0,[SP, #+0]
+   \   0000000A   0xF10D 0x030A      ADD      R3,SP,#+10
+   \   0000000E   0x2200             MOVS     R2,#+0
+   \   00000010   0x2100             MOVS     R1,#+0
+   \   00000012   0x....             LDR.N    R0,??DataTable3_4
+   \   00000014   0x.... 0x....      BL       OSQPend
+    106                  if (err == OS_ERR_NONE) {
+   \   00000018   0xF8BD 0x0008      LDRH     R0,[SP, #+8]
+   \   0000001C   0x2800             CMP      R0,#+0
+   \   0000001E   0xD1F0             BNE.N    ??Servo_Task_0
+    107                      // Wave Flag
+    108                      Servo_SetAngle(90);
+   \   00000020   0x205A             MOVS     R0,#+90
+   \   00000022   0x.... 0x....      BL       Servo_SetAngle
+    109                      OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+   \   00000026   0xA802             ADD      R0,SP,#+8
+   \   00000028   0x9001             STR      R0,[SP, #+4]
+   \   0000002A   0x2000             MOVS     R0,#+0
+   \   0000002C   0x9000             STR      R0,[SP, #+0]
+   \   0000002E   0x2300             MOVS     R3,#+0
+   \   00000030   0x2201             MOVS     R2,#+1
+   \   00000032   0x2100             MOVS     R1,#+0
+   \   00000034   0x2000             MOVS     R0,#+0
+   \   00000036   0x.... 0x....      BL       OSTimeDlyHMSM
+    110                      Servo_SetAngle(0);
+   \   0000003A   0x2000             MOVS     R0,#+0
+   \   0000003C   0x.... 0x....      BL       Servo_SetAngle
+   \   00000040   0xE7DF             B.N      ??Servo_Task_0
+    111                  }
+    112              }
+    113          }
+    114          
+
+   \                                 In section .text, align 2, keep-with-next
+    115          void AppTaskStart(void *p_arg) {
+   \                     AppTaskStart: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+   \   00000002   0xB08A             SUB      SP,SP,#+40
+    116          	OS_ERR err;
+    117          	
+    118              BSP_Init(); // Hardware Init
+   \   00000004   0x.... 0x....      BL       BSP_Init
+    119              
+    120              // Create RTOS Objects
+    121              OSQCreate(&PirDataQ, "PirQ", 10, &err);
+   \   00000008   0xAB09             ADD      R3,SP,#+36
+   \   0000000A   0x220A             MOVS     R2,#+10
+   \   0000000C   0x....             LDR.N    R1,??DataTable3_5
+   \   0000000E   0x....             LDR.N    R0,??DataTable3
+   \   00000010   0x.... 0x....      BL       OSQCreate
+    122              OSQCreate(&ServoQ, "ServoQ", 5, &err);
+   \   00000014   0xAB09             ADD      R3,SP,#+36
+   \   00000016   0x2205             MOVS     R2,#+5
+   \   00000018   0x....             LDR.N    R1,??DataTable3_6
+   \   0000001A   0x....             LDR.N    R0,??DataTable3_4
+   \   0000001C   0x.... 0x....      BL       OSQCreate
+    123              OSQCreate(&BluetoothRxQ, "BluetoothRxQ", 10, &err); // Add Bluetooth Queue
+   \   00000020   0xAB09             ADD      R3,SP,#+36
+   \   00000022   0x220A             MOVS     R2,#+10
+   \   00000024   0x....             LDR.N    R1,??DataTable3_7
+   \   00000026   0x....             LDR.N    R0,??DataTable3_8
+   \   00000028   0x.... 0x....      BL       OSQCreate
+    124              
+    125              // Create Application Tasks
+    126              OSTaskCreate(&PirTaskTCB, "PIR Task", PIR_Task, 0, 4, &PirTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+   \   0000002C   0xA809             ADD      R0,SP,#+36
+   \   0000002E   0x9008             STR      R0,[SP, #+32]
+   \   00000030   0x2003             MOVS     R0,#+3
+   \   00000032   0x9007             STR      R0,[SP, #+28]
+   \   00000034   0x2000             MOVS     R0,#+0
+   \   00000036   0x9006             STR      R0,[SP, #+24]
+   \   00000038   0x2000             MOVS     R0,#+0
+   \   0000003A   0x9005             STR      R0,[SP, #+20]
+   \   0000003C   0x2000             MOVS     R0,#+0
+   \   0000003E   0x9004             STR      R0,[SP, #+16]
+   \   00000040   0x2080             MOVS     R0,#+128
+   \   00000042   0x9003             STR      R0,[SP, #+12]
+   \   00000044   0x200C             MOVS     R0,#+12
+   \   00000046   0x9002             STR      R0,[SP, #+8]
+   \   00000048   0x....             LDR.N    R0,??DataTable3_9
+   \   0000004A   0x9001             STR      R0,[SP, #+4]
+   \   0000004C   0x2004             MOVS     R0,#+4
+   \   0000004E   0x9000             STR      R0,[SP, #+0]
+   \   00000050   0x2300             MOVS     R3,#+0
+   \   00000052   0x....             LDR.N    R2,??DataTable3_10
+   \   00000054   0x....             LDR.N    R1,??DataTable3_11
+   \   00000056   0x....             LDR.N    R0,??DataTable3_12
+   \   00000058   0x.... 0x....      BL       OSTaskCreate
+    127              OSTaskCreate(&StatusTaskTCB, "Status Task", Status_Task, 0, 5, &StatusTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+   \   0000005C   0xA809             ADD      R0,SP,#+36
+   \   0000005E   0x9008             STR      R0,[SP, #+32]
+   \   00000060   0x2003             MOVS     R0,#+3
+   \   00000062   0x9007             STR      R0,[SP, #+28]
+   \   00000064   0x2000             MOVS     R0,#+0
+   \   00000066   0x9006             STR      R0,[SP, #+24]
+   \   00000068   0x2000             MOVS     R0,#+0
+   \   0000006A   0x9005             STR      R0,[SP, #+20]
+   \   0000006C   0x2000             MOVS     R0,#+0
+   \   0000006E   0x9004             STR      R0,[SP, #+16]
+   \   00000070   0x2080             MOVS     R0,#+128
+   \   00000072   0x9003             STR      R0,[SP, #+12]
+   \   00000074   0x200C             MOVS     R0,#+12
+   \   00000076   0x9002             STR      R0,[SP, #+8]
+   \   00000078   0x....             LDR.N    R0,??DataTable3_13
+   \   0000007A   0x9001             STR      R0,[SP, #+4]
+   \   0000007C   0x2005             MOVS     R0,#+5
+   \   0000007E   0x9000             STR      R0,[SP, #+0]
+   \   00000080   0x2300             MOVS     R3,#+0
+   \   00000082   0x....             LDR.N    R2,??DataTable3_14
+   \   00000084   0x....             LDR.N    R1,??DataTable3_15
+   \   00000086   0x....             LDR.N    R0,??DataTable3_16
+   \   00000088   0x.... 0x....      BL       OSTaskCreate
+    128              OSTaskCreate(&ServoTaskTCB, "Servo Task", Servo_Task, 0, 6, &ServoTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+   \   0000008C   0xA809             ADD      R0,SP,#+36
+   \   0000008E   0x9008             STR      R0,[SP, #+32]
+   \   00000090   0x2003             MOVS     R0,#+3
+   \   00000092   0x9007             STR      R0,[SP, #+28]
+   \   00000094   0x2000             MOVS     R0,#+0
+   \   00000096   0x9006             STR      R0,[SP, #+24]
+   \   00000098   0x2000             MOVS     R0,#+0
+   \   0000009A   0x9005             STR      R0,[SP, #+20]
+   \   0000009C   0x2000             MOVS     R0,#+0
+   \   0000009E   0x9004             STR      R0,[SP, #+16]
+   \   000000A0   0x2080             MOVS     R0,#+128
+   \   000000A2   0x9003             STR      R0,[SP, #+12]
+   \   000000A4   0x200C             MOVS     R0,#+12
+   \   000000A6   0x9002             STR      R0,[SP, #+8]
+   \   000000A8   0x....             LDR.N    R0,??DataTable3_17
+   \   000000AA   0x9001             STR      R0,[SP, #+4]
+   \   000000AC   0x2006             MOVS     R0,#+6
+   \   000000AE   0x9000             STR      R0,[SP, #+0]
+   \   000000B0   0x2300             MOVS     R3,#+0
+   \   000000B2   0x....             LDR.N    R2,??DataTable3_18
+   \   000000B4   0x....             LDR.N    R1,??DataTable3_19
+   \   000000B6   0x....             LDR.N    R0,??DataTable3_20
+   \   000000B8   0x.... 0x....      BL       OSTaskCreate
+    129              
+    130              // EXTI IRQ linking might be needed in main or stm32f10x_it.c
+    131          }
+   \   000000BC   0xB00B             ADD      SP,SP,#+44
+   \   000000BE   0xBD00             POP      {PC}             ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3:
+   \   00000000   0x........         DC32     PirDataQ
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_1:
+   \   00000000   0x........         DC32     idle_counter
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_2:
+   \   00000000   0x........         DC32     suspicious_counter
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_3:
+   \   00000000   0x........         DC32     current_state
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_4:
+   \   00000000   0x........         DC32     ServoQ
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_5:
+   \   00000000   0x........         DC32     ?_0
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_6:
+   \   00000000   0x........         DC32     ?_1
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_7:
+   \   00000000   0x........         DC32     ?_2
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_8:
+   \   00000000   0x........         DC32     BluetoothRxQ
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_9:
+   \   00000000   0x........         DC32     PirTaskStk
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_10:
+   \   00000000   0x........         DC32     PIR_Task
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_11:
+   \   00000000   0x........         DC32     ?_3
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_12:
+   \   00000000   0x........         DC32     PirTaskTCB
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_13:
+   \   00000000   0x........         DC32     StatusTaskStk
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_14:
+   \   00000000   0x........         DC32     Status_Task
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_15:
+   \   00000000   0x........         DC32     ?_4
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_16:
+   \   00000000   0x........         DC32     StatusTaskTCB
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_17:
+   \   00000000   0x........         DC32     ServoTaskStk
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_18:
+   \   00000000   0x........         DC32     Servo_Task
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_19:
+   \   00000000   0x........         DC32     ?_5
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_20:
+   \   00000000   0x........         DC32     ServoTaskTCB
+
+   \                                 In section .rodata, align 4
+   \                     ?_0:
+   \   00000000   0x50 0x69          DC8 "PirQ"
+   \              0x72 0x51    
+   \              0x00         
+   \   00000005   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+
+   \                                 In section .rodata, align 4
+   \                     ?_1:
+   \   00000000   0x53 0x65          DC8 "ServoQ"
+   \              0x72 0x76    
+   \              0x6F 0x51    
+   \              0x00         
+   \   00000007   0x00               DC8 0
+
+   \                                 In section .rodata, align 4
+   \                     ?_2:
+   \   00000000   0x42 0x6C          DC8 "BluetoothRxQ"
+   \              0x75 0x65    
+   \              0x74 0x6F    
+   \              0x6F 0x74    
+   \              0x68 0x52    
+   \              0x78 0x51    
+   \              0x00         
+   \   0000000D   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+
+   \                                 In section .rodata, align 4
+   \                     ?_3:
+   \   00000000   0x50 0x49          DC8 "PIR Task"
+   \              0x52 0x20    
+   \              0x54 0x61    
+   \              0x73 0x6B    
+   \              0x00         
+   \   00000009   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+
+   \                                 In section .rodata, align 4
+   \                     ?_4:
+   \   00000000   0x53 0x74          DC8 "Status Task"
+   \              0x61 0x74    
+   \              0x75 0x73    
+   \              0x20 0x54    
+   \              0x61 0x73    
+   \              0x6B 0x00    
+
+   \                                 In section .rodata, align 4
+   \                     ?_5:
+   \   00000000   0x53 0x65          DC8 "Servo Task"
+   \              0x72 0x76    
+   \              0x6F 0x20    
+   \              0x54 0x61    
+   \              0x73 0x6B    
+   \              0x00         
+   \   0000000B   0x00               DC8 0
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      48   AppTaskStart
+        48   -> BSP_Init
+        48   -> OSQCreate
+        48   -> OSTaskCreate
+      16   PIR_Task
+        16   -> OSQPost
+        16   -> OSTimeDlyHMSM
+        16   -> PIR_Read
+      16   Servo_Task
+        16   -> OSQPend
+        16   -> OSTimeDlyHMSM
+        16   -> Servo_SetAngle
+      16   Status_Task
+        16   -> LED_Set
+        16   -> LightSensor_Read
+        16   -> OSQPend
+        16   -> OSQPost
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable3
+       4  ??DataTable3_1
+       4  ??DataTable3_10
+       4  ??DataTable3_11
+       4  ??DataTable3_12
+       4  ??DataTable3_13
+       4  ??DataTable3_14
+       4  ??DataTable3_15
+       4  ??DataTable3_16
+       4  ??DataTable3_17
+       4  ??DataTable3_18
+       4  ??DataTable3_19
+       4  ??DataTable3_2
+       4  ??DataTable3_20
+       4  ??DataTable3_3
+       4  ??DataTable3_4
+       4  ??DataTable3_5
+       4  ??DataTable3_6
+       4  ??DataTable3_7
+       4  ??DataTable3_8
+       4  ??DataTable3_9
+       8  ?_0
+       8  ?_1
+      16  ?_2
+      12  ?_3
+      12  ?_4
+      12  ?_5
+     192  AppTaskStart
+      24  BluetoothRxQ
+       1  MSG_TOUCH_RESET_CODE
+      66  PIR_Task
+      24  PirDataQ
+     512  PirTaskStk
+     168  PirTaskTCB
+      24  ServoQ
+     512  ServoTaskStk
+     168  ServoTaskTCB
+      66  Servo_Task
+      24  StateQ
+     512  StatusTaskStk
+     168  StatusTaskTCB
+     254  Status_Task
+       1  current_state
+       4  idle_counter
+       4  suspicious_counter
+
+ 
+ 2 144 bytes in section .bss
+     1 byte  in section .data
+    69 bytes in section .rodata
+   662 bytes in section .text
+ 
+   662 bytes of CODE  memory
+    69 bytes of CONST memory
+ 2 145 bytes of DATA  memory
+
+Errors: none
+Warnings: 2

@@ -1,0 +1,364 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       20/Dec/2025  11:44:50
+# Copyright 1999-2018 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\os_prio.c
+#    Command line =  
+#        -f C:\Users\pnu3\AppData\Local\Temp\EW29D5.tmp
+#        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\os_prio.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
+#        -o
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj
+#        --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_clustering --no_scheduling --debug --endian=little
+#        --cpu=Cortex-M3 -e --fpu=None --dlib_config "C:\Program Files
+#        (x86)\IAR Systems\Embedded Workbench
+#        8.0\arm\INC\c\DLib_Config_Normal.h" -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\CMSIS\DeviceSupport\Startup\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\inc\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\STM32F10x_StdPeriph_Driver_v3.5\src\
+#        -I C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\inc\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\libraries\LCD\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\uCOS-III\
+#        -I
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uC-LIB\
+#        -Ol -I "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.0\arm\CMSIS\Core\Include\" -I "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include\")
+#    Locale       =  C
+#    List file    =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List\os_prio.lst
+#    Object file  =  
+#        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\Obj\os_prio.o
+#
+###############################################################################
+
+C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Micrium\Software\uCOS-III\Source\os_prio.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                              uC/OS-III
+      4          *                                        The Real-Time Kernel
+      5          *
+      6          *                    Copyright 2009-2022 Silicon Laboratories Inc. www.silabs.com
+      7          *
+      8          *                                 SPDX-License-Identifier: APACHE-2.0
+      9          *
+     10          *               This software is subject to an open source license and is distributed by
+     11          *                Silicon Laboratories Inc. pursuant to the terms of the Apache License,
+     12          *                    Version 2.0 available at www.apache.org/licenses/LICENSE-2.0.
+     13          *
+     14          *********************************************************************************************************
+     15          */
+     16          
+     17          /*
+     18          *********************************************************************************************************
+     19          *                                          PRIORITY MANAGEMENT
+     20          *
+     21          * File    : os_prio.c
+     22          * Version : V3.08.02
+     23          *********************************************************************************************************
+     24          */
+     25          
+     26          #define  MICRIUM_SOURCE
+     27          #include "os.h"
+     28          
+     29          #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+     30          const  CPU_CHAR  *os_prio__c = "$Id: $";
+     31          #endif
+     32          
+     33          
+     34          /*
+     35          ************************************************************************************************************************
+     36          *                                               INITIALIZE THE PRIORITY LIST
+     37          *
+     38          * Description: This function is called by uC/OS-III to initialize the list of ready priorities.
+     39          *
+     40          * Arguments  : none
+     41          *
+     42          * Returns    : none
+     43          *
+     44          * Note       : This function is INTERNAL to uC/OS-III and your application should not call it.
+     45          ************************************************************************************************************************
+     46          */
+     47          
+
+   \                                 In section .text, align 2, keep-with-next
+     48          void  OS_PrioInit (void)
+     49          {
+     50              CPU_DATA  i;
+     51          
+     52          
+     53                                                                          /* Clear the bitmap table ... no task is ready          */
+     54              for (i = 0u; i < OS_PRIO_TBL_SIZE; i++) {
+   \                     OS_PrioInit: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0xE004             B.N      ??OS_PrioInit_0
+     55                   OSPrioTbl[i] = 0u;
+   \                     ??OS_PrioInit_1: (+1)
+   \   00000004   0x2100             MOVS     R1,#+0
+   \   00000006   0x....             LDR.N    R2,??DataTable3
+   \   00000008   0xF842 0x1020      STR      R1,[R2, R0, LSL #+2]
+     56              }
+   \   0000000C   0x1C40             ADDS     R0,R0,#+1
+   \                     ??OS_PrioInit_0: (+1)
+   \   0000000E   0x2802             CMP      R0,#+2
+   \   00000010   0xD3F8             BCC.N    ??OS_PrioInit_1
+     57          
+     58          #if (OS_CFG_TASK_IDLE_EN == 0u)
+     59              OS_PrioInsert ((OS_PRIO)(OS_CFG_PRIO_MAX - 1u));            /* Insert what would be the idle task                   */
+     60          #endif
+     61          }
+   \   00000012   0x4770             BX       LR               ;; return
+     62          
+     63          /*
+     64          ************************************************************************************************************************
+     65          *                                           GET HIGHEST PRIORITY TASK WAITING
+     66          *
+     67          * Description: This function is called by other uC/OS-III services to determine the highest priority task
+     68          *              waiting on the event.
+     69          *
+     70          * Arguments  : none
+     71          *
+     72          * Returns    : The priority of the Highest Priority Task (HPT) waiting for the event
+     73          *
+     74          * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+     75          ************************************************************************************************************************
+     76          */
+     77          
+
+   \                                 In section .text, align 2, keep-with-next
+     78          OS_PRIO  OS_PrioGetHighest (void)
+     79          {
+   \                     OS_PrioGetHighest: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+     80          #if   (OS_CFG_PRIO_MAX <= (CPU_CFG_DATA_SIZE * 8u))             /* Optimize for less than word size nbr of priorities   */
+     81              return ((OS_PRIO)CPU_CntLeadZeros(OSPrioTbl[0]));
+     82          
+     83          
+     84          #elif (OS_CFG_PRIO_MAX <= (2u * (CPU_CFG_DATA_SIZE * 8u)))      /* Optimize for    2x the word size nbr of priorities   */
+     85              if (OSPrioTbl[0] == 0u) {
+   \   00000002   0x....             LDR.N    R0,??DataTable3
+   \   00000004   0x6800             LDR      R0,[R0, #+0]
+   \   00000006   0x2800             CMP      R0,#+0
+   \   00000008   0xD106             BNE.N    ??OS_PrioGetHighest_0
+     86                  return ((OS_PRIO)((OS_PRIO)CPU_CntLeadZeros(OSPrioTbl[1]) + (CPU_CFG_DATA_SIZE * 8u)));
+   \   0000000A   0x....             LDR.N    R0,??DataTable3
+   \   0000000C   0x6840             LDR      R0,[R0, #+4]
+   \   0000000E   0x.... 0x....      BL       CPU_CntLeadZeros
+   \   00000012   0x3020             ADDS     R0,R0,#+32
+   \   00000014   0xB2C0             UXTB     R0,R0            ;; ZeroExt  R0,R0,#+24,#+24
+   \   00000016   0xE004             B.N      ??OS_PrioGetHighest_1
+     87              } else {
+     88                  return ((OS_PRIO)((OS_PRIO)CPU_CntLeadZeros(OSPrioTbl[0])));
+   \                     ??OS_PrioGetHighest_0: (+1)
+   \   00000018   0x....             LDR.N    R0,??DataTable3
+   \   0000001A   0x6800             LDR      R0,[R0, #+0]
+   \   0000001C   0x.... 0x....      BL       CPU_CntLeadZeros
+   \   00000020   0xB2C0             UXTB     R0,R0            ;; ZeroExt  R0,R0,#+24,#+24
+   \                     ??OS_PrioGetHighest_1: (+1)
+   \   00000022   0xBD02             POP      {R1,PC}          ;; return
+     89              }
+     90          
+     91          
+     92          #else
+     93              CPU_DATA  *p_tbl;
+     94              OS_PRIO    prio;
+     95          
+     96          
+     97              prio  = 0u;
+     98              p_tbl = &OSPrioTbl[0];
+     99              while (*p_tbl == 0u) {                                      /* Search the bitmap table for the highest priority     */
+    100                  prio = (OS_PRIO)(prio + (CPU_CFG_DATA_SIZE * 8u));      /* Compute the step of each CPU_DATA entry              */
+    101                  p_tbl++;
+    102              }
+    103              prio += (OS_PRIO)CPU_CntLeadZeros(*p_tbl);                  /* Find the position of the first bit set at the entry  */
+    104          
+    105              return (prio);
+    106          #endif
+    107          }
+    108          
+    109          /*
+    110          ************************************************************************************************************************
+    111          *                                                  INSERT PRIORITY
+    112          *
+    113          * Description: This function is called to insert a priority in the priority table.
+    114          *
+    115          * Arguments  : prio     is the priority to insert
+    116          *
+    117          * Returns    : none
+    118          *
+    119          * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+    120          ************************************************************************************************************************
+    121          */
+    122          
+
+   \                                 In section .text, align 2, keep-with-next
+    123          void  OS_PrioInsert (OS_PRIO  prio)
+    124          {
+    125          #if   (OS_CFG_PRIO_MAX <= (CPU_CFG_DATA_SIZE * 8u))             /* Optimize for less than word size nbr of priorities   */
+    126              OSPrioTbl[0] |= (CPU_DATA)1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - prio);
+    127          
+    128          
+    129          #elif (OS_CFG_PRIO_MAX <= (2u * (CPU_CFG_DATA_SIZE * 8u)))      /* Optimize for    2x the word size nbr of priorities   */
+    130              if (prio < (CPU_CFG_DATA_SIZE * 8u)) {
+   \                     OS_PrioInsert: (+1)
+   \   00000000   0x0001             MOVS     R1,R0
+   \   00000002   0xB2C9             UXTB     R1,R1            ;; ZeroExt  R1,R1,#+24,#+24
+   \   00000004   0x2920             CMP      R1,#+32
+   \   00000006   0xD20A             BCS.N    ??OS_PrioInsert_0
+    131                  OSPrioTbl[0] |= (CPU_DATA)1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - prio);
+   \   00000008   0x....             LDR.N    R1,??DataTable3
+   \   0000000A   0x6809             LDR      R1,[R1, #+0]
+   \   0000000C   0x2201             MOVS     R2,#+1
+   \   0000000E   0xF1D0 0x001F      RSBS     R0,R0,#+31
+   \   00000012   0xFA12 0xF000      LSLS     R0,R2,R0
+   \   00000016   0x4308             ORRS     R0,R0,R1
+   \   00000018   0x....             LDR.N    R1,??DataTable3
+   \   0000001A   0x6008             STR      R0,[R1, #+0]
+   \   0000001C   0xE00A             B.N      ??OS_PrioInsert_1
+    132              } else {
+    133                  OSPrioTbl[1] |= (CPU_DATA)1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - (prio - (CPU_CFG_DATA_SIZE * 8u)));
+   \                     ??OS_PrioInsert_0: (+1)
+   \   0000001E   0x....             LDR.N    R1,??DataTable3
+   \   00000020   0x6849             LDR      R1,[R1, #+4]
+   \   00000022   0x2201             MOVS     R2,#+1
+   \   00000024   0xF1D0 0x001F      RSBS     R0,R0,#+31
+   \   00000028   0x38E0             SUBS     R0,R0,#+224
+   \   0000002A   0xFA12 0xF000      LSLS     R0,R2,R0
+   \   0000002E   0x4308             ORRS     R0,R0,R1
+   \   00000030   0x....             LDR.N    R1,??DataTable3
+   \   00000032   0x6048             STR      R0,[R1, #+4]
+    134              }
+    135          
+    136          
+    137          #else
+    138              CPU_DATA  bit_nbr;
+    139              OS_PRIO   ix;
+    140          
+    141              ix             = (OS_PRIO)(prio /  (CPU_CFG_DATA_SIZE * 8u));
+    142              bit_nbr        = (CPU_DATA)prio & ((CPU_CFG_DATA_SIZE * 8u) - 1u);
+    143              OSPrioTbl[ix] |= (CPU_DATA)1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - bit_nbr);
+    144          #endif
+    145          }
+   \                     ??OS_PrioInsert_1: (+1)
+   \   00000034   0x4770             BX       LR               ;; return
+    146          
+    147          /*
+    148          ************************************************************************************************************************
+    149          *                                                   REMOVE PRIORITY
+    150          *
+    151          * Description: This function is called to remove a priority in the priority table.
+    152          *
+    153          * Arguments  : prio     is the priority to remove
+    154          *
+    155          * Returns    : none
+    156          *
+    157          * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+    158          ************************************************************************************************************************
+    159          */
+    160          
+
+   \                                 In section .text, align 2, keep-with-next
+    161          void  OS_PrioRemove (OS_PRIO  prio)
+    162          {
+    163          #if   (OS_CFG_PRIO_MAX <= (CPU_CFG_DATA_SIZE * 8u))             /* Optimize for less than word size nbr of priorities   */
+    164              OSPrioTbl[0] &= ~((CPU_DATA)1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - prio));
+    165          
+    166          
+    167          #elif (OS_CFG_PRIO_MAX <= (2u * (CPU_CFG_DATA_SIZE * 8u)))      /* Optimize for    2x the word size nbr of priorities   */
+    168              if (prio < (CPU_CFG_DATA_SIZE * 8u)) {
+   \                     OS_PrioRemove: (+1)
+   \   00000000   0x0001             MOVS     R1,R0
+   \   00000002   0xB2C9             UXTB     R1,R1            ;; ZeroExt  R1,R1,#+24,#+24
+   \   00000004   0x2920             CMP      R1,#+32
+   \   00000006   0xD20B             BCS.N    ??OS_PrioRemove_0
+    169                  OSPrioTbl[0] &= ~((CPU_DATA)1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - prio));
+   \   00000008   0x....             LDR.N    R1,??DataTable3
+   \   0000000A   0x6809             LDR      R1,[R1, #+0]
+   \   0000000C   0x2201             MOVS     R2,#+1
+   \   0000000E   0xF1D0 0x001F      RSBS     R0,R0,#+31
+   \   00000012   0xFA12 0xF000      LSLS     R0,R2,R0
+   \   00000016   0xEA31 0x0000      BICS     R0,R1,R0
+   \   0000001A   0x....             LDR.N    R1,??DataTable3
+   \   0000001C   0x6008             STR      R0,[R1, #+0]
+   \   0000001E   0xE00B             B.N      ??OS_PrioRemove_1
+    170              } else {
+    171                  OSPrioTbl[1] &= ~((CPU_DATA)1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - (prio - (CPU_CFG_DATA_SIZE * 8u))));
+   \                     ??OS_PrioRemove_0: (+1)
+   \   00000020   0x....             LDR.N    R1,??DataTable3
+   \   00000022   0x6849             LDR      R1,[R1, #+4]
+   \   00000024   0x2201             MOVS     R2,#+1
+   \   00000026   0xF1D0 0x001F      RSBS     R0,R0,#+31
+   \   0000002A   0x38E0             SUBS     R0,R0,#+224
+   \   0000002C   0xFA12 0xF000      LSLS     R0,R2,R0
+   \   00000030   0xEA31 0x0000      BICS     R0,R1,R0
+   \   00000034   0x....             LDR.N    R1,??DataTable3
+   \   00000036   0x6048             STR      R0,[R1, #+4]
+    172              }
+    173          
+    174          
+    175          #else
+    176              CPU_DATA  bit_nbr;
+    177              OS_PRIO   ix;
+    178          
+    179              ix             =   (OS_PRIO)(prio  /   (CPU_CFG_DATA_SIZE * 8u));
+    180              bit_nbr        =   (CPU_DATA)prio  &  ((CPU_CFG_DATA_SIZE * 8u) - 1u);
+    181              OSPrioTbl[ix] &= ~((CPU_DATA)  1u << (((CPU_CFG_DATA_SIZE * 8u) - 1u) - bit_nbr));
+    182          #endif
+    183          }
+   \                     ??OS_PrioRemove_1: (+1)
+   \   00000038   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3:
+   \   00000000   0x........         DC32     OSPrioTbl
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   OS_PrioGetHighest
+         8   -> CPU_CntLeadZeros
+       0   OS_PrioInit
+       0   OS_PrioInsert
+       0   OS_PrioRemove
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable3
+      36  OS_PrioGetHighest
+      20  OS_PrioInit
+      54  OS_PrioInsert
+      58  OS_PrioRemove
+
+ 
+ 172 bytes in section .text
+ 
+ 172 bytes of CODE memory
+
+Errors: none
+Warnings: none

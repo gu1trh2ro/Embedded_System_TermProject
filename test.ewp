@@ -352,6 +352,8 @@
                     <state>$PROJ_DIR$\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR</state>
                     <state>$PROJ_DIR$\Micrium\Software\uCOS-III\Source</state>
                     <state>$PROJ_DIR$\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR</state>
+                    <state>$PROJ_DIR$\user\uCOS-III</state>
+                    <state>$PROJ_DIR$\Micrium\Software\uC-LIB</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -2290,5 +2292,95 @@
         <file>
             <name>$PROJ_DIR$\user\stm32f10x_it.c</name>
         </file>
+    </group>
+    <group>
+        <name>Micrium</name>
+        <group>
+            <name>uC-CPU</name>
+            <file>
+                <name>$PROJ_DIR$\Micrium\Software\uC-CPU\cpu_core.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\Micrium\Software\uC-CPU\ARM-Cortex-M\ARMv7-M\IAR\cpu_a.asm</name>
+            </file>
+        </group>
+        <group>
+            <name>uC-LIB</name>
+            <file>
+                <name>$PROJ_DIR$\Micrium\Software\uC-LIB\lib_ascii.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\Micrium\Software\uC-LIB\lib_math.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\Micrium\Software\uC-LIB\lib_mem.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\Micrium\Software\uC-LIB\lib_str.c</name>
+            </file>
+        </group>
+        <group>
+            <name>uCOS-III</name>
+            <group>
+                <name>Source</name>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_cfg_app.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_core.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_dbg.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_flag.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_mem.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_msg.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_mutex.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_prio.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_q.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_sem.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_stat.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_task.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_tick.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_time.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_tmr.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Source\os_var.c</name>
+                </file>
+            </group>
+            <group>
+                <name>Ports</name>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\os_cpu_c.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\Micrium\Software\uCOS-III\Ports\ARM-Cortex-M\ARMv7-M\IAR\os_cpu_a.asm</name>
+                </file>
+            </group>
+        </group>
     </group>
 </project>
