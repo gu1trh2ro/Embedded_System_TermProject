@@ -239,5 +239,27 @@ uint8_t PIR_Read(void) {
 }
 
 void Bluetooth_Send(uint8_t data) {
-    // Stub
+// Stub
+}
+
+void Bluetooth_SendString(char *str) {
+    char *p = str;
+    volatile uint32_t timeout;
+    
+    // Send to Bluetooth (USART2) Only
+    while (*p) {
+        timeout = 0;
+        while ((USART2->SR & USART_SR_TXE) == 0) {
+            if (++timeout > 10000) break; // Timeout guard
+        }
+        if (timeout <= 10000) USART_SendData(USART2, *p);
+        
+        p++;
+    }
+    
+    // Newline/Space for readability
+    // Note: Removed \r\n to prevent phantom echo to PC. Using Space separator instead.
+    timeout = 0;
+    while ((USART2->SR & USART_SR_TXE) == 0) { if (++timeout > 10000) break; }
+    if (timeout <= 10000) USART_SendData(USART2, ' ');
 }

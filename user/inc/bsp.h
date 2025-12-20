@@ -53,5 +53,7 @@ uint16_t LightSensor_Read(void);
 uint8_t PIR_Read(void);
 void Bluetooth_Send(uint8_t data);
 
+void Bluetooth_SendString(char *str);
+
 #endif // __BSP_H__
 

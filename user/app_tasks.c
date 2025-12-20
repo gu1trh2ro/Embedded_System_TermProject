@@ -40,10 +40,21 @@ volatile uint8_t g_debug_pir_val = 0; // GLOBAL DEBUG VARIABLE
 void PIR_Task(void *p_arg) {
 	OS_ERR err;
     uint8_t pir_val = 0;
+    static uint8_t prev_pir_val = 255; // Initial invalid value to force first update
     
 	while(1) {
         pir_val = PIR_Read();
         g_debug_pir_val = pir_val;
+        
+        // Bluetooth Status Transmission (Change Detection)
+        if (pir_val != prev_pir_val) {
+            if (pir_val == 1) {
+                Bluetooth_SendString("OCCUPIED");
+            } else {
+                Bluetooth_SendString("EMPTY");
+            }
+            prev_pir_val = pir_val;
+        }
         
         if (pir_val == 1) { // Motion
              OSQPost(&PirDataQ, &pir_val, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
@@ -131,40 +142,67 @@ void Servo_Task(void *p_arg) {
 
 void Display_Task(void *p_arg) {
     OS_ERR err;
-    void *msg;
-    OS_MSG_SIZE size;
-    uint8_t rx_state = 0;
     char str_buf[30];
     char debug_buf[30];
     uint32_t live_tick = 0;
+    
+    // Uptime Tracking
+    static uint32_t uptime_sec = 0;
+    static uint8_t tick_100ms = 0;
+    
+    // Previous State Tracking for Optimization
+    static uint8_t prev_state = 255; 
+    static uint32_t prev_idle = 255;
+    static uint32_t prev_suspicious = 255;
+    static uint8_t prev_pir_val = 255;
+    static uint32_t prev_uptime = 255;
     
     LCD_Clear(WHITE);
     LCD_ShowString(10, 10, "System Ready", BLACK, WHITE);
     
     while(1) {
-        // Check for State Update (Non-blocking)
-        msg = OSQPend(&StateQ, 0, OS_OPT_PEND_NON_BLOCKING, &size, NULL, &err);
-        
-        if (err == OS_ERR_NONE) {
-            rx_state = *(uint8_t*)msg;
+        // Update Uptime (1s interval)
+        if (++tick_100ms >= 10) {
+            uptime_sec++;
+            tick_100ms = 0;
+        }
+
+        // 1. Update Status/Timer Area (Only on change)
+        if (current_state != prev_state || 
+            (current_state == 2 && idle_counter != prev_idle) ||
+            (current_state == 3 && suspicious_counter != prev_suspicious)) 
+        {
+            if (current_state == 1) {
+                 LCD_ShowString(10, 40, "STATUS: OCCUPIED  ", BLACK, WHITE);
+                 sprintf(str_buf, "VACANT: %d s      ", 0);
+            } else if (current_state == 2) {
+                 LCD_ShowString(10, 40, "STATUS: VACANT    ", BLACK, WHITE);
+                 sprintf(str_buf, "VACANT: %d s      ", idle_counter);
+            } else if (current_state == 3) {
+                 LCD_ShowString(10, 40, "STATUS: SUSPICIOUS", BLACK, WHITE);
+                 sprintf(str_buf, "SUSPIC: %d s      ", suspicious_counter);
+            }
+            LCD_ShowString(10, 70, str_buf, BLACK, WHITE);
+            
+            // Update tracking variables
+            prev_state = current_state;
+            prev_idle = idle_counter;
+            prev_suspicious = suspicious_counter;
         }
         
-        // Update Screen
-        if (current_state == 1) {
-             LCD_ShowString(10, 40, "STATUS: OCCUPIED  ", BLACK, WHITE);
-             sprintf(str_buf, "TIME: %d s        ", 0);
-        } else if (current_state == 2) {
-             LCD_ShowString(10, 40, "STATUS: VACANT    ", BLACK, WHITE);
-             sprintf(str_buf, "TIME: %d s        ", idle_counter);
-        } else if (current_state == 3) {
-             LCD_ShowString(10, 40, "STATUS: SUSPICIOUS", BLACK, WHITE);
-             sprintf(str_buf, "TIME: %d s        ", suspicious_counter);
+        // 2. Debug Output (PIR Value - Only on change)
+        if (g_debug_pir_val != prev_pir_val) {
+            sprintf(debug_buf, "PIR:%d            ", g_debug_pir_val); // Spaces to clear old text
+            LCD_ShowString(10, 100, debug_buf, RED, WHITE);
+            prev_pir_val = g_debug_pir_val;
         }
-        LCD_ShowString(10, 70, str_buf, BLACK, WHITE);
-        
-        // Debug Output (Real-time PIR + Live Tick)
-        sprintf(debug_buf, "PIR:%d  LIVE:%d", g_debug_pir_val, live_tick++);
-        LCD_ShowString(10, 100, debug_buf, RED, WHITE);
+
+        // 3. Uptime (Only on change - every 1s)
+        if (uptime_sec != prev_uptime) {
+            sprintf(str_buf, "UPTIME: %d s", uptime_sec);
+            LCD_ShowString(10, 130, str_buf, BLUE, WHITE);
+            prev_uptime = uptime_sec;
+        }
 
         // Refresh Rate: 100ms
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -173,8 +211,6 @@ void Display_Task(void *p_arg) {
 
 void Bluetooth_Task(void *p_arg) {
     OS_ERR err;
-    void *msg;
-    OS_MSG_SIZE size;
     
     while(1) {
          OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -192,11 +228,20 @@ void AppTaskStart(void *p_arg) {
     OSQCreate(&ServoQ, "ServoQ", 5, &err);
     OSQCreate(&BluetoothRxQ, "BluetoothRxQ", 10, &err); 
     
+    // Enable SysTick for OS Time (Critical for OSTimeDly to work)
+    OS_CPU_SysTickInit(SystemCoreClock / OS_CFG_TICK_RATE_HZ);
+    
     // Create Application Tasks
+    // Status Task (5), PIR Task (4)
     OSTaskCreate(&PirTaskTCB, "PIR Task", PIR_Task, 0, 4, &PirTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
     OSTaskCreate(&StatusTaskTCB, "Status Task", Status_Task, 0, 5, &StatusTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
-    // Updated Stack Size to 256
+    
+    // Display Task (6) - Increased Stack
     OSTaskCreate(&DisplayTaskTCB, "Display Task", Display_Task, 0, 6, &DisplayTaskStk[0], 12, 256, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
-    OSTaskCreate(&BluetoothTaskTCB, "BT Task", Bluetooth_Task, 0, 6, &BluetoothTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+    
+    // Servo Task (7)
     OSTaskCreate(&ServoTaskTCB, "Servo Task", Servo_Task, 0, 7, &ServoTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+
+    // BT Task (8) - Lower priority than Servo/Display to avoid conflict
+    OSTaskCreate(&BluetoothTaskTCB, "BT Task", Bluetooth_Task, 0, 8, &BluetoothTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
 }
