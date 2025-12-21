@@ -46,6 +46,7 @@ void PIR_Task(void *p_arg) {
     // Touch Sensor Variables
     uint8_t touch_val = 0;
     static uint8_t prev_touch_val = 0;
+    uint8_t state_msg = 0;
 
 	while(1) {
         // --- 1. PIR Sensor Handling ---
@@ -71,9 +72,11 @@ void PIR_Task(void *p_arg) {
         if (prev_category == 2) {
             prev_category = current_category; // Sync initial state without sending
         } else if (current_category != prev_category) {
-             char light_msg[20];
-             sprintf(light_msg, "%d\r\n", light_val);
-             Bluetooth_SendString(light_msg);
+             if (current_category == 1) {
+                 Bluetooth_SendString("ON\r\n");
+             } else {
+                 Bluetooth_SendString("OFF\r\n");
+             }
              prev_category = current_category;
         }
         
@@ -90,8 +93,22 @@ void PIR_Task(void *p_arg) {
         touch_val = GPIO_ReadInputDataBit(TOUCH_PORT, TOUCH_PIN);
         
         if (touch_val != prev_touch_val) {
-            if (touch_val == 1) { // 1 = Pressed (Confirmed by Debug)
-                 Bluetooth_SendString("TOUCH\r\n");
+            if (touch_val == 1) { // 1 = Pressed
+                 // Toggle Away Mode
+                 if (current_state == 4) {
+                     // Currently Away -> Back to Occupied
+                     current_state = 1;
+                     Bluetooth_SendString("BACK\r\n");
+                     state_msg = current_state;
+                     OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                 } else {
+                     // Currently Occupied/Vacant/Suspicious -> Set to Away
+                     current_state = 4;
+                     Bluetooth_SendString("AWAY\r\n");
+                     state_msg = current_state;
+                     OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                 }
+                 
                  idle_counter = 0;
                  suspicious_counter = 0;
             } 
@@ -135,7 +152,7 @@ void Status_Task(void *p_arg) {
                 // PIR Motion (val == 1)
                 idle_counter = 0;
                 suspicious_counter = 0;
-                if (current_state != 1) {
+                if (current_state != 1 && current_state != 4) {
                     current_state = 1;
                     state_msg = current_state;
                     OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
@@ -173,8 +190,10 @@ void Status_Task(void *p_arg) {
             LED_Set(1, 1); LED_Set(2, 0); // Green ON
         } else if (current_state == 2) {
             LED_Set(1, 0); LED_Set(2, 0); // All OFF
-        } else {
+        } else if (current_state == 3) {
             LED_Set(1, 0); LED_Set(2, 1); // Red ON
+        } else if (current_state == 4) {
+            LED_Set(1, 1); LED_Set(2, 1); // Both ON (Orange/Yellowish)
         }
 	}
 }
@@ -199,8 +218,6 @@ void Display_Task(void *p_arg) {
     OS_ERR err;
     char str_buf[30];
     char debug_buf[30];
-    uint32_t live_tick = 0;
-    
     // Uptime Tracking
     static uint32_t uptime_sec = 0;
     static uint8_t tick_100ms = 0;
@@ -236,6 +253,9 @@ void Display_Task(void *p_arg) {
             } else if (current_state == 3) {
                  LCD_ShowString(10, 40, "STATUS: SUSPICIOUS", BLACK, WHITE);
                  sprintf(str_buf, "SUSPIC: %d s      ", suspicious_counter);
+            } else if (current_state == 4) {
+                 LCD_ShowString(10, 40, "STATUS: AWAY      ", BLACK, WHITE);
+                 sprintf(str_buf, "User Away         ");
             }
             LCD_ShowString(10, 70, str_buf, BLACK, WHITE);
             
