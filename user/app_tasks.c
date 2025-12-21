@@ -60,21 +60,24 @@ void PIR_Task(void *p_arg) {
         }
         
         // --- 3. Light Sensor Handling (PC2) ---
-        // Threshold Logic: 0~99 (Dark) vs 100~4095 (Bright)
-        // Send value only when crossing the threshold.
-        uint16_t light_val = LightSensor_Read();
-        uint8_t current_category = (light_val >= 100) ? 1 : 0; // 0: Dark, 1: Bright
-        static uint8_t prev_category = 2; // 2: Unknown (Initial status)
-        
-        if (prev_category == 2) {
-            prev_category = current_category; // Sync initial state without sending
-        } else if (current_category != prev_category) {
-             if (current_category == 1) {
-                 Bluetooth_SendString("ON\r\n");
-             } else {
-                 Bluetooth_SendString("OFF\r\n");
-             }
-             prev_category = current_category;
+        // Dependency: Only read Light Sensor if NOT Vacant (State 2)
+        if (current_state != 2) {
+            // Threshold Logic: 0~99 (Dark) vs 100~4095 (Bright)
+            // Send value only when crossing the threshold.
+            uint16_t light_val = LightSensor_Read();
+            uint8_t current_category = (light_val >= 100) ? 1 : 0; // 0: Dark, 1: Bright
+            static uint8_t prev_category = 2; // 2: Unknown (Initial status)
+            
+            if (prev_category == 2) {
+                prev_category = current_category; // Sync initial state without sending
+            } else if (current_category != prev_category) {
+                 if (current_category == 1) {
+                     Bluetooth_SendString("ON\r\n");
+                 } else {
+                     Bluetooth_SendString("OFF\r\n");
+                 }
+                 prev_category = current_category;
+            }
         }
         
         if (pir_val == 1) { 
