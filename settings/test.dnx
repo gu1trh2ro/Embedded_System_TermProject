@@ -46,7 +46,7 @@
         <LeaveTargetRunning>_ 0</LeaveTargetRunning>
     </JLinkDriver>
     <DebugChecksum>
-        <Checksum>2462074127</Checksum>
+        <Checksum>1311907610</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -57,6 +57,7 @@
     </CodeCoverage>
     <Disassembly>
         <InstrCount>0</InstrCount>
+        <MixedMode>1</MixedMode>
     </Disassembly>
     <CallStack>
         <ShowArgs>0</ShowArgs>
@@ -81,7 +82,9 @@
         <LogFile>_ ""</LogFile>
     </TermIOLog>
     <Aliases>
-        <Count>0</Count>
+        <A0>_ "C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\main.c" ""</A0>
+        <A1>_ "C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\stm32f10x_it.c" ""</A1>
+        <Count>2</Count>
         <SuppressDialog>0</SuppressDialog>
     </Aliases>
     <DriverProfiling>

@@ -49,9 +49,9 @@ void PIR_Task(void *p_arg) {
         // Bluetooth Status Transmission (Change Detection)
         if (pir_val != prev_pir_val) {
             if (pir_val == 1) {
-                Bluetooth_SendString("OCCUPIED");
+                Bluetooth_SendString("OCCUPIED\r\n");
             } else {
-                Bluetooth_SendString("EMPTY");
+                Bluetooth_SendString("EMPTY\r\n");
             }
             prev_pir_val = pir_val;
         }

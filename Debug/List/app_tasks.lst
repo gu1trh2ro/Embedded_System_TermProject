@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       20/Dec/2025  17:33:35
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       21/Dec/2025  12:36:31
 # Copyright 1999-2018 IAR Systems AB.
 #
 #    Cpu mode     =  thumb
@@ -8,7 +8,7 @@
 #    Source file  =  
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
 #    Command line =  
-#        -f C:\Users\pnu3\AppData\Local\Temp\EW75BE.tmp
+#        -f C:\Users\pnu3\AppData\Local\Temp\EWD5F1.tmp
 #        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
 #        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
@@ -202,9 +202,9 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
    \   00000028   0xF89D 0x0008      LDRB     R0,[SP, #+8]
    \   0000002C   0x2801             CMP      R0,#+1
    \   0000002E   0xD004             BEQ.N    ??PIR_Task_2
-     52                          Bluetooth_SendString("OCCUPIED");
+     52                          Bluetooth_SendString("OCCUPIED\r\n");
      53                      } else {
-     54                          Bluetooth_SendString("EMPTY");
+     54                          Bluetooth_SendString("EMPTY\r\n");
    \                     ??PIR_Task_3: (+1)
    \   00000030   0x.... 0x....      LDR.W    R0,??DataTable4_2
    \   00000034   0x.... 0x....      BL       Bluetooth_SendString
@@ -1223,20 +1223,20 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
 
    \                                 In section .rodata, align 4
    \                     ?_0:
-   \   00000000   0x4F 0x43          DC8 "OCCUPIED"
+   \   00000000   0x4F 0x43          DC8 "OCCUPIED\015\012"
    \              0x43 0x55    
    \              0x50 0x49    
    \              0x45 0x44    
+   \              0x0D 0x0A    
    \              0x00         
-   \   00000009   0x00 0x00          DC8 0, 0, 0
-   \              0x00         
+   \   0000000B   0x00               DC8 0
 
    \                                 In section .rodata, align 4
    \                     ?_1:
-   \   00000000   0x45 0x4D          DC8 "EMPTY"
+   \   00000000   0x45 0x4D          DC8 "EMPTY\015\012"
    \              0x50 0x54    
-   \              0x59 0x00    
-   \   00000006   0x00 0x00          DC8 0, 0
+   \              0x59 0x0D    
+   \              0x0A 0x00    
 
    \                                 In section .rodata, align 4
    \                     ?_2:
