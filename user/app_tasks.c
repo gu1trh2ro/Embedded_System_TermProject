@@ -62,19 +62,19 @@ void PIR_Task(void *p_arg) {
         }
         
         // --- 3. Light Sensor Handling (PC2) ---
-        // Change-based Polling (Like PIR/Touch)
-        // Only sending when value changes significantly to avoid noise.
+        // Threshold Logic: 0~99 (Dark) vs 100~4095 (Bright)
+        // Send value only when crossing the threshold.
         uint16_t light_val = LightSensor_Read();
-        static uint16_t prev_light_val = 9999; // Force initial update
+        uint8_t current_category = (light_val >= 100) ? 1 : 0; // 0: Dark, 1: Bright
+        static uint8_t prev_category = 2; // 2: Unknown (Initial status)
         
-        int diff = (int)light_val - (int)prev_light_val;
-        if (diff < 0) diff = -diff;
-        
-        if (diff > 50) { // Threshold: 50 (approx 1.2% of range)
-             char light_msg[30];
-             sprintf(light_msg, "LIGHT: %d\r\n", light_val);
+        if (prev_category == 2) {
+            prev_category = current_category; // Sync initial state without sending
+        } else if (current_category != prev_category) {
+             char light_msg[20];
+             sprintf(light_msg, "%d\r\n", light_val);
              Bluetooth_SendString(light_msg);
-             prev_light_val = light_val;
+             prev_category = current_category;
         }
         
         if (pir_val == 1) { 
