@@ -126,7 +126,12 @@ void Status_Task(void *p_arg) {
     uint16_t light_val = 0;
     uint8_t state_msg = 0;
     
-    // Initial State Update
+    // New Logic Variables
+    static uint32_t away_timer = 0;
+    static uint8_t action_triggered = 0; // 0: Ready, 1: Triggered (Wait for reset)
+
+    // Initial State Update (Start as BACK/Occupied = 1)
+    current_state = 1; 
     OSQPost(&StateQ, (void *)&current_state, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
 
 	while(1) {
@@ -135,65 +140,99 @@ void Status_Task(void *p_arg) {
 
         if (err == OS_ERR_NONE) {
             uint8_t val = *(uint8_t *)msg;
+            
             if (val == MSG_TOUCH_RESET_CODE) {
-                // Touch Press
+                // Touch Press -> Button Logic handled in PIR_Task, but status confirmed here?
+                // Actually PIR_Task handles the toggle and updates current_state.
+                // We just receive notification here to clear counters.
                 Bluetooth_SendString("TOUCHED\r\n");
                 idle_counter = 0;
-                suspicious_counter = 0;
-                if (current_state != 1) {
-                    current_state = 1;
-                    state_msg = current_state;
-                    OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-                }
+                away_timer = 0;
+                action_triggered = 0; // Reset trigger on user interaction
+                
+                // State update is handled in PIR_Task, but we ensure it matches
+                // If PIR_Task toggled it, current_state is already updated.
             } else if (val == MSG_TOUCH_RELEASE_CODE) {
-                // Touch Release
-                Bluetooth_SendString("TOUCH_RELEASED\r\n");
+                 Bluetooth_SendString("TOUCH_RELEASED\r\n");
             } else {
                 // PIR Motion (val == 1)
-                idle_counter = 0;
-                suspicious_counter = 0;
-                if (current_state != 1 && current_state != 4) {
-                    current_state = 1;
-                    state_msg = current_state;
-                    OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                // In BACK mode, motion resets EMPTY status
+                if (current_state != 4) { 
+                    idle_counter = 0;
+                    action_triggered = 0; // Reset trigger so it can fire again next time it's empty
+                    if (current_state != 1) { // If was 'Vacant' logic locally
+                        current_state = 1;
+                        state_msg = current_state;
+                        OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                    }
                 }
+                // In AWAY mode, we ignore PIR motion (it doesn't reset AWAY timer defined by user?)
+                // User said: "In AWAY... ignore all values... count 1 min... if not switched BACK... servo"
+                // So PIR motion should probably NOT reset away_timer.
             }
         } else if (err == OS_ERR_TIMEOUT) {
-            // No Motion for 1 sec
-            idle_counter++;
+            // 1 Second Tick
             
-            if (current_state == 1 && idle_counter >= 5) { // 5s test (req 10min)
-                 // Check Light
-                 light_val = LightSensor_Read();
-                 if (light_val > 3500) { // Bright -> Suspicious
-                     current_state = 3;
-                 } else { // Dark -> Vacant
-                     current_state = 2;
-                 }
-                 state_msg = current_state;
-                 OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-            }
-            
-            if (current_state == 3) {
-                suspicious_counter++;
-                if (suspicious_counter > 15) { // Demo threshold: 15s? (Req 5min)
-                    // Trigger Servo
-                    uint8_t servo_cmd = 1;
-                    OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err);
-                    suspicious_counter = 0;
+            if (current_state == 4) { 
+                // --- AWAY MODE ---
+                away_timer++;
+                if (away_timer >= 13) {
+                    if (action_triggered == 0) {
+                         // Fire Servo
+                         uint8_t servo_cmd = 1;
+                         OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err);
+                         
+                         // Check Light explicitly here too as per "All Servo Operations" rule
+                         light_val = LightSensor_Read();
+                         if (light_val >= 100) {
+                             Bluetooth_SendString("turn off the light\r\n");
+                         }
+                         
+                         action_triggered = 1; // Run once per AWAY session
+                    }
+                }
+            } else {
+                // --- BACK MODE ---
+                // "If Touch is BACK..."
+                idle_counter++; // Count vacancy
+                
+                if (idle_counter >= 5) { // EMPTY (5s threshold)
+                    if (action_triggered == 0) { 
+                        // Check Light
+                        light_val = LightSensor_Read();
+                        
+                        uint8_t servo_cmd = 1;
+                        OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err); // Servo acts in both cases
+                        
+                        if (light_val >= 100) {
+                            // Condition: Light >= 100 (ON) & Empty -> "Turn off the light"
+                            Bluetooth_SendString("turn off the light\r\n");
+                        } 
+                        // If >= 100, just Servo (already posted above)
+                        
+                        action_triggered = 1; // Fire once per vacancy event
+                        
+                        // Update State for Display/LED (Optional, but good for UI)
+                        if (current_state != 2) {
+                            current_state = 2; // Vacant
+                            state_msg = current_state;
+                            OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                        }
+                    }
                 }
             }
         }
         
-        // Output State to LED/LCD
-        if(current_state == 1) {
-            LED_Set(1, 1); LED_Set(2, 0); // Green ON
-        } else if (current_state == 2) {
-            LED_Set(1, 0); LED_Set(2, 0); // All OFF
-        } else if (current_state == 3) {
-            LED_Set(1, 0); LED_Set(2, 1); // Red ON
-        } else if (current_state == 4) {
-            LED_Set(1, 1); LED_Set(2, 1); // Both ON (Orange/Yellowish)
+        // Output State to LED
+        if(current_state == 4) {
+            LED_Set(1, 1); LED_Set(2, 1); // Orange (Away)
+        } else {
+            // BACK Mode (Occupied or Vacant)
+            if (idle_counter < 5) {
+                 LED_Set(1, 1); LED_Set(2, 0); // Green (Occupied)
+            } else {
+                 LED_Set(1, 0); LED_Set(2, 0); // Off (Vacant)
+            }
         }
 	}
 }
@@ -203,6 +242,13 @@ void Servo_Task(void *p_arg) {
     void *msg;
     OS_MSG_SIZE size;
     
+    // --- One-time Run for Verification ---
+    Servo_SetAngle(90);
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    Servo_SetAngle(0);
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    // -------------------------------------
+
     while(1) {
         msg = OSQPend(&ServoQ, 0, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
         if (err == OS_ERR_NONE) {

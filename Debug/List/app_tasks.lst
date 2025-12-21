@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       21/Dec/2025  15:44:50
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       21/Dec/2025  16:08:18
 # Copyright 1999-2018 IAR Systems AB.
 #
 #    Cpu mode     =  thumb
@@ -8,7 +8,7 @@
 #    Source file  =  
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
 #    Command line =  
-#        -f C:\Users\pnu3\AppData\Local\Temp\EW3E33.tmp
+#        -f C:\Users\pnu3\AppData\Local\Temp\EWBD29.tmp
 #        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
 #        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
@@ -441,7 +441,7 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
    \                                 In section .text, align 2, keep-with-next
     122          void Status_Task(void *p_arg) {
    \                     Status_Task: (+1)
-   \   00000000   0xB5F8             PUSH     {R3-R7,LR}
+   \   00000000   0xB51F             PUSH     {R0-R4,LR}
     123          	OS_ERR err;
     124              void *msg;
     125              OS_MSG_SIZE size;
@@ -451,408 +451,482 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\app_tasks.c
    \   00000004   0x2000             MOVS     R0,#+0
    \   00000006   0xF88D 0x0008      STRB     R0,[SP, #+8]
     128              
-    129              // Initial State Update
-    130              OSQPost(&StateQ, (void *)&current_state, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-   \   0000000A   0xF10D 0x000A      ADD      R0,SP,#+10
+    129              // New Logic Variables
+    130              static uint32_t away_timer = 0;
+    131              static uint8_t action_triggered = 0; // 0: Ready, 1: Triggered (Wait for reset)
+    132          
+    133              // Initial State Update (Start as BACK/Occupied = 1)
+    134              current_state = 1; 
+   \   0000000A   0x2001             MOVS     R0,#+1
+   \   0000000C   0x.... 0x....      LDR.W    R1,??DataTable4
+   \   00000010   0x7008             STRB     R0,[R1, #+0]
+    135              OSQPost(&StateQ, (void *)&current_state, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+   \   00000012   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   00000016   0x9000             STR      R0,[SP, #+0]
+   \   00000018   0x2300             MOVS     R3,#+0
+   \   0000001A   0x2201             MOVS     R2,#+1
+   \   0000001C   0x.... 0x....      LDR.W    R1,??DataTable4
+   \   00000020   0x.... 0x....      LDR.W    R0,??DataTable4_2
+   \   00000024   0x.... 0x....      BL       OSQPost
+   \   00000028   0xE007             B.N      ??Status_Task_0
+    136          
+    137          	while(1) {
+    138                  // Wait for PIR data or Timeout (1s)
+    139                  msg = OSQPend(&PirDataQ, 1000, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
+    140          
+    141                  if (err == OS_ERR_NONE) {
+    142                      uint8_t val = *(uint8_t *)msg;
+    143                      
+    144                      if (val == MSG_TOUCH_RESET_CODE) {
+    145                          // Touch Press -> Button Logic handled in PIR_Task, but status confirmed here?
+    146                          // Actually PIR_Task handles the toggle and updates current_state.
+    147                          // We just receive notification here to clear counters.
+    148                          Bluetooth_SendString("TOUCHED\r\n");
+    149                          idle_counter = 0;
+    150                          away_timer = 0;
+    151                          action_triggered = 0; // Reset trigger on user interaction
+    152                          
+    153                          // State update is handled in PIR_Task, but we ensure it matches
+    154                          // If PIR_Task toggled it, current_state is already updated.
+    155                      } else if (val == MSG_TOUCH_RELEASE_CODE) {
+    156                           Bluetooth_SendString("TOUCH_RELEASED\r\n");
+    157                      } else {
+    158                          // PIR Motion (val == 1)
+    159                          // In BACK mode, motion resets EMPTY status
+    160                          if (current_state != 4) { 
+    161                              idle_counter = 0;
+    162                              action_triggered = 0; // Reset trigger so it can fire again next time it's empty
+    163                              if (current_state != 1) { // If was 'Vacant' logic locally
+    164                                  current_state = 1;
+    165                                  state_msg = current_state;
+    166                                  OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+    167                              }
+    168                          }
+    169                          // In AWAY mode, we ignore PIR motion (it doesn't reset AWAY timer defined by user?)
+    170                          // User said: "In AWAY... ignore all values... count 1 min... if not switched BACK... servo"
+    171                          // So PIR motion should probably NOT reset away_timer.
+    172                      }
+    173                  } else if (err == OS_ERR_TIMEOUT) {
+    174                      // 1 Second Tick
+    175                      
+    176                      if (current_state == 4) { 
+    177                          // --- AWAY MODE ---
+    178                          away_timer++;
+    179                          if (away_timer >= 13) {
+    180                              if (action_triggered == 0) {
+    181                                   // Fire Servo
+    182                                   uint8_t servo_cmd = 1;
+    183                                   OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err);
+    184                                   
+    185                                   // Check Light explicitly here too as per "All Servo Operations" rule
+    186                                   light_val = LightSensor_Read();
+    187                                   if (light_val >= 100) {
+    188                                       Bluetooth_SendString("turn off the light\r\n");
+    189                                   }
+    190                                   
+    191                                   action_triggered = 1; // Run once per AWAY session
+    192                              }
+    193                          }
+    194                      } else {
+    195                          // --- BACK MODE ---
+    196                          // "If Touch is BACK..."
+    197                          idle_counter++; // Count vacancy
+    198                          
+    199                          if (idle_counter >= 5) { // EMPTY (5s threshold)
+    200                              if (action_triggered == 0) { 
+    201                                  // Check Light
+    202                                  light_val = LightSensor_Read();
+    203                                  
+    204                                  uint8_t servo_cmd = 1;
+    205                                  OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err); // Servo acts in both cases
+    206                                  
+    207                                  if (light_val >= 100) {
+    208                                      // Condition: Light >= 100 (ON) & Empty -> "Turn off the light"
+    209                                      Bluetooth_SendString("turn off the light\r\n");
+    210                                  } 
+    211                                  // If >= 100, just Servo (already posted above)
+    212                                  
+    213                                  action_triggered = 1; // Fire once per vacancy event
+    214                                  
+    215                                  // Update State for Display/LED (Optional, but good for UI)
+    216                                  if (current_state != 2) {
+    217                                      current_state = 2; // Vacant
+    218                                      state_msg = current_state;
+    219                                      OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+    220                                  }
+    221                              }
+    222                          }
+    223                      }
+    224                  }
+    225                  
+    226                  // Output State to LED
+    227                  if(current_state == 4) {
+    228                      LED_Set(1, 1); LED_Set(2, 1); // Orange (Away)
+   \                     ??Status_Task_1: (+1)
+   \   0000002A   0x2101             MOVS     R1,#+1
+   \   0000002C   0x2001             MOVS     R0,#+1
+   \   0000002E   0x.... 0x....      BL       LED_Set
+   \   00000032   0x2101             MOVS     R1,#+1
+   \   00000034   0x2002             MOVS     R0,#+2
+   \   00000036   0x.... 0x....      BL       LED_Set
+    229                  } else {
+   \                     ??Status_Task_0: (+1)
+   \   0000003A   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   0000003E   0x9001             STR      R0,[SP, #+4]
+   \   00000040   0x2000             MOVS     R0,#+0
+   \   00000042   0x9000             STR      R0,[SP, #+0]
+   \   00000044   0xAB03             ADD      R3,SP,#+12
+   \   00000046   0x2200             MOVS     R2,#+0
+   \   00000048   0xF44F 0x717A      MOV      R1,#+1000
+   \   0000004C   0x.... 0x....      LDR.W    R0,??DataTable4_6
+   \   00000050   0x.... 0x....      BL       OSQPend
+   \   00000054   0xF8BD 0x100A      LDRH     R1,[SP, #+10]
+   \   00000058   0x2900             CMP      R1,#+0
+   \   0000005A   0xD14B             BNE.N    ??Status_Task_2
+   \   0000005C   0x7800             LDRB     R0,[R0, #+0]
+   \   0000005E   0x0001             MOVS     R1,R0
+   \   00000060   0x.... 0x....      LDR.W    R2,??DataTable4_17
+   \   00000064   0x7812             LDRB     R2,[R2, #+0]
+   \   00000066   0xB2C9             UXTB     R1,R1            ;; ZeroExt  R1,R1,#+24,#+24
+   \   00000068   0x4291             CMP      R1,R2
+   \   0000006A   0xD110             BNE.N    ??Status_Task_3
+   \   0000006C   0x.... 0x....      LDR.W    R0,??DataTable4_18
+   \   00000070   0x.... 0x....      BL       Bluetooth_SendString
+   \   00000074   0x2000             MOVS     R0,#+0
+   \   00000076   0x.... 0x....      LDR.W    R1,??DataTable4_10
+   \   0000007A   0x6008             STR      R0,[R1, #+0]
+   \   0000007C   0x2000             MOVS     R0,#+0
+   \   0000007E   0x.... 0x....      LDR.W    R1,??DataTable4_19
+   \   00000082   0x6008             STR      R0,[R1, #+0]
+   \   00000084   0x2000             MOVS     R0,#+0
+   \   00000086   0x.... 0x....      LDR.W    R1,??DataTable4_20
+   \   0000008A   0x7008             STRB     R0,[R1, #+0]
+   \   0000008C   0xE0AE             B.N      ??Status_Task_4
+   \                     ??Status_Task_3: (+1)
+   \   0000008E   0x.... 0x....      LDR.W    R1,??DataTable4_21
+   \   00000092   0x7809             LDRB     R1,[R1, #+0]
+   \   00000094   0xB2C0             UXTB     R0,R0            ;; ZeroExt  R0,R0,#+24,#+24
+   \   00000096   0x4288             CMP      R0,R1
+   \   00000098   0xD104             BNE.N    ??Status_Task_5
+   \   0000009A   0x.... 0x....      LDR.W    R0,??DataTable4_22
+   \   0000009E   0x.... 0x....      BL       Bluetooth_SendString
+   \   000000A2   0xE0A3             B.N      ??Status_Task_4
+   \                     ??Status_Task_5: (+1)
+   \   000000A4   0x.... 0x....      LDR.W    R0,??DataTable4
+   \   000000A8   0x7800             LDRB     R0,[R0, #+0]
+   \   000000AA   0x2804             CMP      R0,#+4
+   \   000000AC   0xF000 0x809E      BEQ.W    ??Status_Task_4
+   \   000000B0   0x2000             MOVS     R0,#+0
+   \   000000B2   0x.... 0x....      LDR.W    R1,??DataTable4_10
+   \   000000B6   0x6008             STR      R0,[R1, #+0]
+   \   000000B8   0x2000             MOVS     R0,#+0
+   \   000000BA   0x.... 0x....      LDR.W    R1,??DataTable4_20
+   \   000000BE   0x7008             STRB     R0,[R1, #+0]
+   \   000000C0   0x.... 0x....      LDR.W    R0,??DataTable4
+   \   000000C4   0x7800             LDRB     R0,[R0, #+0]
+   \   000000C6   0x2801             CMP      R0,#+1
+   \   000000C8   0xF000 0x8090      BEQ.W    ??Status_Task_4
+   \   000000CC   0x2001             MOVS     R0,#+1
+   \   000000CE   0x.... 0x....      LDR.W    R1,??DataTable4
+   \   000000D2   0x7008             STRB     R0,[R1, #+0]
+   \   000000D4   0x.... 0x....      LDR.W    R0,??DataTable4
+   \   000000D8   0x7800             LDRB     R0,[R0, #+0]
+   \   000000DA   0xF88D 0x0008      STRB     R0,[SP, #+8]
+   \   000000DE   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   000000E2   0x9000             STR      R0,[SP, #+0]
+   \   000000E4   0x2300             MOVS     R3,#+0
+   \   000000E6   0x2201             MOVS     R2,#+1
+   \   000000E8   0xA902             ADD      R1,SP,#+8
+   \   000000EA   0x.... 0x....      LDR.W    R0,??DataTable4_2
+   \   000000EE   0x.... 0x....      BL       OSQPost
+   \   000000F2   0xE07B             B.N      ??Status_Task_4
+   \                     ??Status_Task_2: (+1)
+   \   000000F4   0xF8BD 0x000A      LDRH     R0,[SP, #+10]
+   \   000000F8   0xF247 0x21D9      MOVW     R1,#+29401
+   \   000000FC   0x4288             CMP      R0,R1
+   \   000000FE   0xD175             BNE.N    ??Status_Task_4
+   \   00000100   0x.... 0x....      LDR.W    R0,??DataTable4
+   \   00000104   0x7800             LDRB     R0,[R0, #+0]
+   \   00000106   0x2804             CMP      R0,#+4
+   \   00000108   0xD12C             BNE.N    ??Status_Task_6
+   \   0000010A   0x.... 0x....      LDR.W    R0,??DataTable4_19
+   \   0000010E   0x6800             LDR      R0,[R0, #+0]
+   \   00000110   0x1C40             ADDS     R0,R0,#+1
+   \   00000112   0x.... 0x....      LDR.W    R1,??DataTable4_19
+   \   00000116   0x6008             STR      R0,[R1, #+0]
+   \   00000118   0x.... 0x....      LDR.W    R0,??DataTable4_19
+   \   0000011C   0x6800             LDR      R0,[R0, #+0]
+   \   0000011E   0x280D             CMP      R0,#+13
+   \   00000120   0xD364             BCC.N    ??Status_Task_4
+   \   00000122   0x.... 0x....      LDR.W    R0,??DataTable4_20
+   \   00000126   0x7800             LDRB     R0,[R0, #+0]
+   \   00000128   0x2800             CMP      R0,#+0
+   \   0000012A   0xD15F             BNE.N    ??Status_Task_4
+   \   0000012C   0x2001             MOVS     R0,#+1
+   \   0000012E   0xF88D 0x0005      STRB     R0,[SP, #+5]
+   \   00000132   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   00000136   0x9000             STR      R0,[SP, #+0]
+   \   00000138   0x2300             MOVS     R3,#+0
+   \   0000013A   0x2201             MOVS     R2,#+1
+   \   0000013C   0xF10D 0x0105      ADD      R1,SP,#+5
+   \   00000140   0x.... 0x....      LDR.W    R0,??DataTable4_23
+   \   00000144   0x.... 0x....      BL       OSQPost
+   \   00000148   0x.... 0x....      BL       LightSensor_Read
+   \   0000014C   0xB280             UXTH     R0,R0            ;; ZeroExt  R0,R0,#+16,#+16
+   \   0000014E   0x2864             CMP      R0,#+100
+   \   00000150   0xDB03             BLT.N    ??Status_Task_7
+   \   00000152   0x.... 0x....      LDR.W    R0,??DataTable4_24
+   \   00000156   0x.... 0x....      BL       Bluetooth_SendString
+   \                     ??Status_Task_7: (+1)
+   \   0000015A   0x2001             MOVS     R0,#+1
+   \   0000015C   0x.... 0x....      LDR.W    R1,??DataTable4_20
+   \   00000160   0x7008             STRB     R0,[R1, #+0]
+   \   00000162   0xE043             B.N      ??Status_Task_4
+   \                     ??Status_Task_6: (+1)
+   \   00000164   0x.... 0x....      LDR.W    R0,??DataTable4_10
+   \   00000168   0x6800             LDR      R0,[R0, #+0]
+   \   0000016A   0x1C40             ADDS     R0,R0,#+1
+   \   0000016C   0x.... 0x....      LDR.W    R1,??DataTable4_10
+   \   00000170   0x6008             STR      R0,[R1, #+0]
+   \   00000172   0x.... 0x....      LDR.W    R0,??DataTable4_10
+   \   00000176   0x6800             LDR      R0,[R0, #+0]
+   \   00000178   0x2805             CMP      R0,#+5
+   \   0000017A   0xD337             BCC.N    ??Status_Task_4
+   \   0000017C   0x.... 0x....      LDR.W    R0,??DataTable4_20
+   \   00000180   0x7800             LDRB     R0,[R0, #+0]
+   \   00000182   0x2800             CMP      R0,#+0
+   \   00000184   0xD132             BNE.N    ??Status_Task_4
+   \   00000186   0x.... 0x....      BL       LightSensor_Read
+   \   0000018A   0x0004             MOVS     R4,R0
+   \   0000018C   0x2001             MOVS     R0,#+1
+   \   0000018E   0xF88D 0x0004      STRB     R0,[SP, #+4]
+   \   00000192   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   00000196   0x9000             STR      R0,[SP, #+0]
+   \   00000198   0x2300             MOVS     R3,#+0
+   \   0000019A   0x2201             MOVS     R2,#+1
+   \   0000019C   0xA901             ADD      R1,SP,#+4
+   \   0000019E   0x.... 0x....      LDR.W    R0,??DataTable4_23
+   \   000001A2   0x.... 0x....      BL       OSQPost
+   \   000001A6   0xB2A4             UXTH     R4,R4            ;; ZeroExt  R4,R4,#+16,#+16
+   \   000001A8   0x2C64             CMP      R4,#+100
+   \   000001AA   0xDB03             BLT.N    ??Status_Task_8
+   \   000001AC   0x.... 0x....      LDR.W    R0,??DataTable4_24
+   \   000001B0   0x.... 0x....      BL       Bluetooth_SendString
+   \                     ??Status_Task_8: (+1)
+   \   000001B4   0x2001             MOVS     R0,#+1
+   \   000001B6   0x.... 0x....      LDR.W    R1,??DataTable4_20
+   \   000001BA   0x7008             STRB     R0,[R1, #+0]
+   \   000001BC   0x.... 0x....      LDR.W    R0,??DataTable4
+   \   000001C0   0x7800             LDRB     R0,[R0, #+0]
+   \   000001C2   0x2802             CMP      R0,#+2
+   \   000001C4   0xD012             BEQ.N    ??Status_Task_4
+   \   000001C6   0x2002             MOVS     R0,#+2
+   \   000001C8   0x.... 0x....      LDR.W    R1,??DataTable4
+   \   000001CC   0x7008             STRB     R0,[R1, #+0]
+   \   000001CE   0x.... 0x....      LDR.W    R0,??DataTable4
+   \   000001D2   0x7800             LDRB     R0,[R0, #+0]
+   \   000001D4   0xF88D 0x0008      STRB     R0,[SP, #+8]
+   \   000001D8   0xF10D 0x000A      ADD      R0,SP,#+10
+   \   000001DC   0x9000             STR      R0,[SP, #+0]
+   \   000001DE   0x2300             MOVS     R3,#+0
+   \   000001E0   0x2201             MOVS     R2,#+1
+   \   000001E2   0xA902             ADD      R1,SP,#+8
+   \   000001E4   0x.... 0x....      LDR.W    R0,??DataTable4_2
+   \   000001E8   0x.... 0x....      BL       OSQPost
+   \                     ??Status_Task_4: (+1)
+   \   000001EC   0x.... 0x....      LDR.W    R0,??DataTable4
+   \   000001F0   0x7800             LDRB     R0,[R0, #+0]
+   \   000001F2   0x2804             CMP      R0,#+4
+   \   000001F4   0xF43F 0xAF19      BEQ.W    ??Status_Task_1
+    230                      // BACK Mode (Occupied or Vacant)
+    231                      if (idle_counter < 5) {
+   \   000001F8   0x.... 0x....      LDR.W    R0,??DataTable4_10
+   \   000001FC   0x6800             LDR      R0,[R0, #+0]
+   \   000001FE   0x2805             CMP      R0,#+5
+   \   00000200   0xD208             BCS.N    ??Status_Task_9
+    232                           LED_Set(1, 1); LED_Set(2, 0); // Green (Occupied)
+   \   00000202   0x2101             MOVS     R1,#+1
+   \   00000204   0x2001             MOVS     R0,#+1
+   \   00000206   0x.... 0x....      BL       LED_Set
+   \   0000020A   0x2100             MOVS     R1,#+0
+   \   0000020C   0x2002             MOVS     R0,#+2
+   \   0000020E   0x.... 0x....      BL       LED_Set
+   \   00000212   0xE712             B.N      ??Status_Task_0
+    233                      } else {
+    234                           LED_Set(1, 0); LED_Set(2, 0); // Off (Vacant)
+   \                     ??Status_Task_9: (+1)
+   \   00000214   0x2100             MOVS     R1,#+0
+   \   00000216   0x2001             MOVS     R0,#+1
+   \   00000218   0x.... 0x....      BL       LED_Set
+   \   0000021C   0x2100             MOVS     R1,#+0
+   \   0000021E   0x2002             MOVS     R0,#+2
+   \   00000220   0x.... 0x....      BL       LED_Set
+   \   00000224   0xE709             B.N      ??Status_Task_0
+    235                      }
+    236                  }
+    237          	}
+    238          }
+
+   \                                 In section .bss, align 4
+   \                     `Status_Task::away_timer`:
+   \   00000000                      DS8 4
+
+   \                                 In section .bss, align 1
+   \                     `Status_Task::action_triggered`:
+   \   00000000                      DS8 1
+    239          
+
+   \                                 In section .text, align 2, keep-with-next
+    240          void Servo_Task(void *p_arg) {
+   \                     Servo_Task: (+1)
+   \   00000000   0xB5E0             PUSH     {R5-R7,LR}
+    241              OS_ERR err;
+    242              void *msg;
+                           ^
+Warning[Pe550]: variable "msg" was set but never used
+    243              OS_MSG_SIZE size;
+    244              
+    245              // --- One-time Run for Verification ---
+    246              Servo_SetAngle(90);
+   \   00000002   0x205A             MOVS     R0,#+90
+   \   00000004   0x.... 0x....      BL       Servo_SetAngle
+    247              OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+   \   00000008   0xA802             ADD      R0,SP,#+8
+   \   0000000A   0x9001             STR      R0,[SP, #+4]
+   \   0000000C   0x2000             MOVS     R0,#+0
    \   0000000E   0x9000             STR      R0,[SP, #+0]
    \   00000010   0x2300             MOVS     R3,#+0
    \   00000012   0x2201             MOVS     R2,#+1
-   \   00000014   0x.... 0x....      LDR.W    R1,??DataTable4
-   \   00000018   0x.... 0x....      LDR.W    R0,??DataTable4_2
-   \   0000001C   0x.... 0x....      BL       OSQPost
-   \   00000020   0xE007             B.N      ??Status_Task_0
-    131          
-    132          	while(1) {
-    133                  // Wait for PIR data or Timeout (1s)
-    134                  msg = OSQPend(&PirDataQ, 1000, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
-    135          
-    136                  if (err == OS_ERR_NONE) {
-    137                      uint8_t val = *(uint8_t *)msg;
-    138                      if (val == MSG_TOUCH_RESET_CODE) {
-    139                          // Touch Press
-    140                          Bluetooth_SendString("TOUCHED\r\n");
-    141                          idle_counter = 0;
-    142                          suspicious_counter = 0;
-    143                          if (current_state != 1) {
-    144                              current_state = 1;
-    145                              state_msg = current_state;
-    146                              OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-    147                          }
-    148                      } else if (val == MSG_TOUCH_RELEASE_CODE) {
-    149                          // Touch Release
-    150                          Bluetooth_SendString("TOUCH_RELEASED\r\n");
-    151                      } else {
-    152                          // PIR Motion (val == 1)
-    153                          idle_counter = 0;
-    154                          suspicious_counter = 0;
-    155                          if (current_state != 1 && current_state != 4) {
-    156                              current_state = 1;
-    157                              state_msg = current_state;
-    158                              OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-    159                          }
-    160                      }
-    161                  } else if (err == OS_ERR_TIMEOUT) {
-    162                      // No Motion for 1 sec
-    163                      idle_counter++;
-    164                      
-    165                      if (current_state == 1 && idle_counter >= 5) { // 5s test (req 10min)
-    166                           // Check Light
-    167                           light_val = LightSensor_Read();
-    168                           if (light_val > 3500) { // Bright -> Suspicious
-    169                               current_state = 3;
-    170                           } else { // Dark -> Vacant
-    171                               current_state = 2;
-    172                           }
-    173                           state_msg = current_state;
-    174                           OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-    175                      }
-    176                      
-    177                      if (current_state == 3) {
-    178                          suspicious_counter++;
-    179                          if (suspicious_counter > 15) { // Demo threshold: 15s? (Req 5min)
-    180                              // Trigger Servo
-    181                              uint8_t servo_cmd = 1;
-    182                              OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err);
-    183                              suspicious_counter = 0;
-    184                          }
-    185                      }
-    186                  }
-    187                  
-    188                  // Output State to LED/LCD
-    189                  if(current_state == 1) {
-    190                      LED_Set(1, 1); LED_Set(2, 0); // Green ON
-   \                     ??Status_Task_1: (+1)
-   \   00000022   0x2101             MOVS     R1,#+1
-   \   00000024   0x2001             MOVS     R0,#+1
-   \   00000026   0x.... 0x....      BL       LED_Set
-   \   0000002A   0x2100             MOVS     R1,#+0
-   \   0000002C   0x2002             MOVS     R0,#+2
-   \   0000002E   0x.... 0x....      BL       LED_Set
-    191                  } else if (current_state == 2) {
-   \                     ??Status_Task_0: (+1)
-   \   00000032   0xF10D 0x000A      ADD      R0,SP,#+10
-   \   00000036   0x9001             STR      R0,[SP, #+4]
-   \   00000038   0x2000             MOVS     R0,#+0
-   \   0000003A   0x9000             STR      R0,[SP, #+0]
-   \   0000003C   0xAB03             ADD      R3,SP,#+12
-   \   0000003E   0x2200             MOVS     R2,#+0
-   \   00000040   0xF44F 0x717A      MOV      R1,#+1000
-   \   00000044   0x.... 0x....      LDR.W    R0,??DataTable4_6
-   \   00000048   0x.... 0x....      BL       OSQPend
-   \   0000004C   0xF8BD 0x100A      LDRH     R1,[SP, #+10]
-   \   00000050   0x2900             CMP      R1,#+0
-   \   00000052   0xD15E             BNE.N    ??Status_Task_2
-   \   00000054   0x7800             LDRB     R0,[R0, #+0]
-   \   00000056   0x0001             MOVS     R1,R0
-   \   00000058   0x.... 0x....      LDR.W    R2,??DataTable4_17
-   \   0000005C   0x7812             LDRB     R2,[R2, #+0]
-   \   0000005E   0xB2C9             UXTB     R1,R1            ;; ZeroExt  R1,R1,#+24,#+24
-   \   00000060   0x4291             CMP      R1,R2
-   \   00000062   0xD125             BNE.N    ??Status_Task_3
-   \   00000064   0x.... 0x....      LDR.W    R0,??DataTable4_18
-   \   00000068   0x.... 0x....      BL       Bluetooth_SendString
-   \   0000006C   0x2000             MOVS     R0,#+0
-   \   0000006E   0x.... 0x....      LDR.W    R1,??DataTable4_10
-   \   00000072   0x6008             STR      R0,[R1, #+0]
-   \   00000074   0x2000             MOVS     R0,#+0
-   \   00000076   0x.... 0x....      LDR.W    R1,??DataTable4_11
-   \   0000007A   0x6008             STR      R0,[R1, #+0]
-   \   0000007C   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   00000080   0x7800             LDRB     R0,[R0, #+0]
-   \   00000082   0x2801             CMP      R0,#+1
-   \   00000084   0xF000 0x809D      BEQ.W    ??Status_Task_4
-   \   00000088   0x2001             MOVS     R0,#+1
-   \   0000008A   0x.... 0x....      LDR.W    R1,??DataTable4
-   \   0000008E   0x7008             STRB     R0,[R1, #+0]
-   \   00000090   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   00000094   0x7800             LDRB     R0,[R0, #+0]
-   \   00000096   0xF88D 0x0008      STRB     R0,[SP, #+8]
-   \   0000009A   0xF10D 0x000A      ADD      R0,SP,#+10
-   \   0000009E   0x9000             STR      R0,[SP, #+0]
-   \   000000A0   0x2300             MOVS     R3,#+0
-   \   000000A2   0x2201             MOVS     R2,#+1
-   \   000000A4   0xA902             ADD      R1,SP,#+8
-   \   000000A6   0x.... 0x....      LDR.W    R0,??DataTable4_2
-   \   000000AA   0x.... 0x....      BL       OSQPost
-   \   000000AE   0xE088             B.N      ??Status_Task_4
-   \                     ??Status_Task_3: (+1)
-   \   000000B0   0x.... 0x....      LDR.W    R1,??DataTable4_19
-   \   000000B4   0x7809             LDRB     R1,[R1, #+0]
-   \   000000B6   0xB2C0             UXTB     R0,R0            ;; ZeroExt  R0,R0,#+24,#+24
-   \   000000B8   0x4288             CMP      R0,R1
-   \   000000BA   0xD104             BNE.N    ??Status_Task_5
-   \   000000BC   0x.... 0x....      LDR.W    R0,??DataTable4_20
-   \   000000C0   0x.... 0x....      BL       Bluetooth_SendString
-   \   000000C4   0xE07D             B.N      ??Status_Task_4
-   \                     ??Status_Task_5: (+1)
-   \   000000C6   0x2000             MOVS     R0,#+0
-   \   000000C8   0x.... 0x....      LDR.W    R1,??DataTable4_10
-   \   000000CC   0x6008             STR      R0,[R1, #+0]
-   \   000000CE   0x2000             MOVS     R0,#+0
-   \   000000D0   0x.... 0x....      LDR.W    R1,??DataTable4_11
-   \   000000D4   0x6008             STR      R0,[R1, #+0]
-   \   000000D6   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   000000DA   0x7800             LDRB     R0,[R0, #+0]
-   \   000000DC   0x2801             CMP      R0,#+1
-   \   000000DE   0xD070             BEQ.N    ??Status_Task_4
-   \   000000E0   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   000000E4   0x7800             LDRB     R0,[R0, #+0]
-   \   000000E6   0x2804             CMP      R0,#+4
-   \   000000E8   0xD06B             BEQ.N    ??Status_Task_4
-   \   000000EA   0x2001             MOVS     R0,#+1
-   \   000000EC   0x.... 0x....      LDR.W    R1,??DataTable4
-   \   000000F0   0x7008             STRB     R0,[R1, #+0]
-   \   000000F2   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   000000F6   0x7800             LDRB     R0,[R0, #+0]
-   \   000000F8   0xF88D 0x0008      STRB     R0,[SP, #+8]
-   \   000000FC   0xF10D 0x000A      ADD      R0,SP,#+10
-   \   00000100   0x9000             STR      R0,[SP, #+0]
-   \   00000102   0x2300             MOVS     R3,#+0
-   \   00000104   0x2201             MOVS     R2,#+1
-   \   00000106   0xA902             ADD      R1,SP,#+8
-   \   00000108   0x.... 0x....      LDR.W    R0,??DataTable4_2
-   \   0000010C   0x.... 0x....      BL       OSQPost
-   \   00000110   0xE057             B.N      ??Status_Task_4
-   \                     ??Status_Task_2: (+1)
-   \   00000112   0xF8BD 0x000A      LDRH     R0,[SP, #+10]
-   \   00000116   0xF247 0x21D9      MOVW     R1,#+29401
-   \   0000011A   0x4288             CMP      R0,R1
-   \   0000011C   0xD151             BNE.N    ??Status_Task_4
-   \   0000011E   0x.... 0x....      LDR.W    R0,??DataTable4_10
-   \   00000122   0x6800             LDR      R0,[R0, #+0]
-   \   00000124   0x1C40             ADDS     R0,R0,#+1
-   \   00000126   0x.... 0x....      LDR.W    R1,??DataTable4_10
-   \   0000012A   0x6008             STR      R0,[R1, #+0]
-   \   0000012C   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   00000130   0x7800             LDRB     R0,[R0, #+0]
-   \   00000132   0x2801             CMP      R0,#+1
-   \   00000134   0xD123             BNE.N    ??Status_Task_6
-   \   00000136   0x.... 0x....      LDR.W    R0,??DataTable4_10
-   \   0000013A   0x6800             LDR      R0,[R0, #+0]
-   \   0000013C   0x2805             CMP      R0,#+5
-   \   0000013E   0xD31E             BCC.N    ??Status_Task_6
-   \   00000140   0x.... 0x....      BL       LightSensor_Read
-   \   00000144   0xB280             UXTH     R0,R0            ;; ZeroExt  R0,R0,#+16,#+16
-   \   00000146   0xF640 0x51AD      MOVW     R1,#+3501
-   \   0000014A   0x4288             CMP      R0,R1
-   \   0000014C   0xDB04             BLT.N    ??Status_Task_7
-   \   0000014E   0x2003             MOVS     R0,#+3
-   \   00000150   0x.... 0x....      LDR.W    R1,??DataTable4
-   \   00000154   0x7008             STRB     R0,[R1, #+0]
-   \   00000156   0xE003             B.N      ??Status_Task_8
-   \                     ??Status_Task_7: (+1)
-   \   00000158   0x2002             MOVS     R0,#+2
-   \   0000015A   0x.... 0x....      LDR.W    R1,??DataTable4
-   \   0000015E   0x7008             STRB     R0,[R1, #+0]
-   \                     ??Status_Task_8: (+1)
-   \   00000160   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   00000164   0x7800             LDRB     R0,[R0, #+0]
-   \   00000166   0xF88D 0x0008      STRB     R0,[SP, #+8]
-   \   0000016A   0xF10D 0x000A      ADD      R0,SP,#+10
-   \   0000016E   0x9000             STR      R0,[SP, #+0]
-   \   00000170   0x2300             MOVS     R3,#+0
-   \   00000172   0x2201             MOVS     R2,#+1
-   \   00000174   0xA902             ADD      R1,SP,#+8
-   \   00000176   0x.... 0x....      LDR.W    R0,??DataTable4_2
-   \   0000017A   0x.... 0x....      BL       OSQPost
-   \                     ??Status_Task_6: (+1)
-   \   0000017E   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   00000182   0x7800             LDRB     R0,[R0, #+0]
-   \   00000184   0x2803             CMP      R0,#+3
-   \   00000186   0xD11C             BNE.N    ??Status_Task_4
-   \   00000188   0x.... 0x....      LDR.W    R0,??DataTable4_11
-   \   0000018C   0x6800             LDR      R0,[R0, #+0]
-   \   0000018E   0x1C40             ADDS     R0,R0,#+1
-   \   00000190   0x.... 0x....      LDR.W    R1,??DataTable4_11
-   \   00000194   0x6008             STR      R0,[R1, #+0]
-   \   00000196   0x.... 0x....      LDR.W    R0,??DataTable4_11
-   \   0000019A   0x6800             LDR      R0,[R0, #+0]
-   \   0000019C   0x2810             CMP      R0,#+16
-   \   0000019E   0xD310             BCC.N    ??Status_Task_4
-   \   000001A0   0x2001             MOVS     R0,#+1
-   \   000001A2   0xF88D 0x0004      STRB     R0,[SP, #+4]
-   \   000001A6   0xF10D 0x000A      ADD      R0,SP,#+10
-   \   000001AA   0x9000             STR      R0,[SP, #+0]
-   \   000001AC   0x2300             MOVS     R3,#+0
-   \   000001AE   0x2201             MOVS     R2,#+1
-   \   000001B0   0xA901             ADD      R1,SP,#+4
-   \   000001B2   0x.... 0x....      LDR.W    R0,??DataTable4_21
-   \   000001B6   0x.... 0x....      BL       OSQPost
-   \   000001BA   0x2000             MOVS     R0,#+0
-   \   000001BC   0x.... 0x....      LDR.W    R1,??DataTable4_11
-   \   000001C0   0x6008             STR      R0,[R1, #+0]
-   \                     ??Status_Task_4: (+1)
-   \   000001C2   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   000001C6   0x7800             LDRB     R0,[R0, #+0]
-   \   000001C8   0x2801             CMP      R0,#+1
-   \   000001CA   0xF43F 0xAF2A      BEQ.W    ??Status_Task_1
-   \   000001CE   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   000001D2   0x7800             LDRB     R0,[R0, #+0]
-   \   000001D4   0x2802             CMP      R0,#+2
-   \   000001D6   0xD108             BNE.N    ??Status_Task_9
-    192                      LED_Set(1, 0); LED_Set(2, 0); // All OFF
-   \   000001D8   0x2100             MOVS     R1,#+0
-   \   000001DA   0x2001             MOVS     R0,#+1
-   \   000001DC   0x.... 0x....      BL       LED_Set
-   \   000001E0   0x2100             MOVS     R1,#+0
-   \   000001E2   0x2002             MOVS     R0,#+2
-   \   000001E4   0x.... 0x....      BL       LED_Set
-   \   000001E8   0xE723             B.N      ??Status_Task_0
-    193                  } else if (current_state == 3) {
-   \                     ??Status_Task_9: (+1)
-   \   000001EA   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   000001EE   0x7800             LDRB     R0,[R0, #+0]
-   \   000001F0   0x2803             CMP      R0,#+3
-   \   000001F2   0xD108             BNE.N    ??Status_Task_10
-    194                      LED_Set(1, 0); LED_Set(2, 1); // Red ON
-   \   000001F4   0x2100             MOVS     R1,#+0
-   \   000001F6   0x2001             MOVS     R0,#+1
-   \   000001F8   0x.... 0x....      BL       LED_Set
-   \   000001FC   0x2101             MOVS     R1,#+1
-   \   000001FE   0x2002             MOVS     R0,#+2
-   \   00000200   0x.... 0x....      BL       LED_Set
-   \   00000204   0xE715             B.N      ??Status_Task_0
-    195                  } else if (current_state == 4) {
-   \                     ??Status_Task_10: (+1)
-   \   00000206   0x.... 0x....      LDR.W    R0,??DataTable4
-   \   0000020A   0x7800             LDRB     R0,[R0, #+0]
-   \   0000020C   0x2804             CMP      R0,#+4
-   \   0000020E   0xF47F 0xAF10      BNE.W    ??Status_Task_0
-    196                      LED_Set(1, 1); LED_Set(2, 1); // Both ON (Orange/Yellowish)
-   \   00000212   0x2101             MOVS     R1,#+1
-   \   00000214   0x2001             MOVS     R0,#+1
-   \   00000216   0x.... 0x....      BL       LED_Set
-   \   0000021A   0x2101             MOVS     R1,#+1
-   \   0000021C   0x2002             MOVS     R0,#+2
-   \   0000021E   0x.... 0x....      BL       LED_Set
-   \   00000222   0xE706             B.N      ??Status_Task_0
-    197                  }
-    198          	}
-    199          }
-    200          
-
-   \                                 In section .text, align 2, keep-with-next
-    201          void Servo_Task(void *p_arg) {
-   \                     Servo_Task: (+1)
-   \   00000000   0xB5E0             PUSH     {R5-R7,LR}
-    202              OS_ERR err;
-    203              void *msg;
-                           ^
-Warning[Pe550]: variable "msg" was set but never used
-    204              OS_MSG_SIZE size;
-    205              
-    206              while(1) {
-    207                  msg = OSQPend(&ServoQ, 0, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
+   \   00000014   0x2100             MOVS     R1,#+0
+   \   00000016   0x2000             MOVS     R0,#+0
+   \   00000018   0x.... 0x....      BL       OSTimeDlyHMSM
+    248              Servo_SetAngle(0);
+   \   0000001C   0x2000             MOVS     R0,#+0
+   \   0000001E   0x.... 0x....      BL       Servo_SetAngle
+    249              OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+   \   00000022   0xA802             ADD      R0,SP,#+8
+   \   00000024   0x9001             STR      R0,[SP, #+4]
+   \   00000026   0x2000             MOVS     R0,#+0
+   \   00000028   0x9000             STR      R0,[SP, #+0]
+   \   0000002A   0x2300             MOVS     R3,#+0
+   \   0000002C   0x2201             MOVS     R2,#+1
+   \   0000002E   0x2100             MOVS     R1,#+0
+   \   00000030   0x2000             MOVS     R0,#+0
+   \   00000032   0x.... 0x....      BL       OSTimeDlyHMSM
+    250              // -------------------------------------
+    251          
+    252              while(1) {
+    253                  msg = OSQPend(&ServoQ, 0, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
    \                     ??Servo_Task_0: (+1)
-   \   00000002   0xA802             ADD      R0,SP,#+8
-   \   00000004   0x9001             STR      R0,[SP, #+4]
-   \   00000006   0x2000             MOVS     R0,#+0
-   \   00000008   0x9000             STR      R0,[SP, #+0]
-   \   0000000A   0xF10D 0x030A      ADD      R3,SP,#+10
-   \   0000000E   0x2200             MOVS     R2,#+0
-   \   00000010   0x2100             MOVS     R1,#+0
-   \   00000012   0x.... 0x....      LDR.W    R0,??DataTable4_21
-   \   00000016   0x.... 0x....      BL       OSQPend
-    208                  if (err == OS_ERR_NONE) {
-   \   0000001A   0xF8BD 0x0008      LDRH     R0,[SP, #+8]
-   \   0000001E   0x2800             CMP      R0,#+0
-   \   00000020   0xD1EF             BNE.N    ??Servo_Task_0
-    209                      // Wave Flag
-    210                      Servo_SetAngle(90);
-   \   00000022   0x205A             MOVS     R0,#+90
-   \   00000024   0x.... 0x....      BL       Servo_SetAngle
-    211                      OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-   \   00000028   0xA802             ADD      R0,SP,#+8
-   \   0000002A   0x9001             STR      R0,[SP, #+4]
-   \   0000002C   0x2000             MOVS     R0,#+0
-   \   0000002E   0x9000             STR      R0,[SP, #+0]
-   \   00000030   0x2300             MOVS     R3,#+0
-   \   00000032   0x2201             MOVS     R2,#+1
-   \   00000034   0x2100             MOVS     R1,#+0
-   \   00000036   0x2000             MOVS     R0,#+0
-   \   00000038   0x.... 0x....      BL       OSTimeDlyHMSM
-    212                      Servo_SetAngle(0);
-   \   0000003C   0x2000             MOVS     R0,#+0
-   \   0000003E   0x.... 0x....      BL       Servo_SetAngle
-   \   00000042   0xE7DE             B.N      ??Servo_Task_0
-    213                  }
-    214              }
-    215          }
-    216          
+   \   00000036   0xA802             ADD      R0,SP,#+8
+   \   00000038   0x9001             STR      R0,[SP, #+4]
+   \   0000003A   0x2000             MOVS     R0,#+0
+   \   0000003C   0x9000             STR      R0,[SP, #+0]
+   \   0000003E   0xF10D 0x030A      ADD      R3,SP,#+10
+   \   00000042   0x2200             MOVS     R2,#+0
+   \   00000044   0x2100             MOVS     R1,#+0
+   \   00000046   0x.... 0x....      LDR.W    R0,??DataTable4_23
+   \   0000004A   0x.... 0x....      BL       OSQPend
+    254                  if (err == OS_ERR_NONE) {
+   \   0000004E   0xF8BD 0x0008      LDRH     R0,[SP, #+8]
+   \   00000052   0x2800             CMP      R0,#+0
+   \   00000054   0xD1EF             BNE.N    ??Servo_Task_0
+    255                      // Wave Flag
+    256                      Servo_SetAngle(90);
+   \   00000056   0x205A             MOVS     R0,#+90
+   \   00000058   0x.... 0x....      BL       Servo_SetAngle
+    257                      OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+   \   0000005C   0xA802             ADD      R0,SP,#+8
+   \   0000005E   0x9001             STR      R0,[SP, #+4]
+   \   00000060   0x2000             MOVS     R0,#+0
+   \   00000062   0x9000             STR      R0,[SP, #+0]
+   \   00000064   0x2300             MOVS     R3,#+0
+   \   00000066   0x2201             MOVS     R2,#+1
+   \   00000068   0x2100             MOVS     R1,#+0
+   \   0000006A   0x2000             MOVS     R0,#+0
+   \   0000006C   0x.... 0x....      BL       OSTimeDlyHMSM
+    258                      Servo_SetAngle(0);
+   \   00000070   0x2000             MOVS     R0,#+0
+   \   00000072   0x.... 0x....      BL       Servo_SetAngle
+   \   00000076   0xE7DE             B.N      ??Servo_Task_0
+    259                  }
+    260              }
+    261          }
+    262          
 
    \                                 In section .text, align 2, keep-with-next
-    217          void Display_Task(void *p_arg) {
+    263          void Display_Task(void *p_arg) {
    \                     Display_Task: (+1)
    \   00000000   0xB500             PUSH     {LR}
    \   00000002   0xB093             SUB      SP,SP,#+76
-    218              OS_ERR err;
-    219              char str_buf[30];
-    220              char debug_buf[30];
-    221              // Uptime Tracking
-    222              static uint32_t uptime_sec = 0;
-    223              static uint8_t tick_100ms = 0;
-    224              
-    225              // Previous State Tracking for Optimization
-    226              static uint8_t prev_state = 255; 
-    227              static uint32_t prev_idle = 255;
-    228              static uint32_t prev_suspicious = 255;
-    229              static uint8_t prev_pir_val = 255;
-    230              static uint32_t prev_uptime = 255;
-    231              
-    232              LCD_Clear(WHITE);
+    264              OS_ERR err;
+    265              char str_buf[30];
+    266              char debug_buf[30];
+    267              // Uptime Tracking
+    268              static uint32_t uptime_sec = 0;
+    269              static uint8_t tick_100ms = 0;
+    270              
+    271              // Previous State Tracking for Optimization
+    272              static uint8_t prev_state = 255; 
+    273              static uint32_t prev_idle = 255;
+    274              static uint32_t prev_suspicious = 255;
+    275              static uint8_t prev_pir_val = 255;
+    276              static uint32_t prev_uptime = 255;
+    277              
+    278              LCD_Clear(WHITE);
    \   00000004   0xF64F 0x70FF      MOVW     R0,#+65535
    \   00000008   0x.... 0x....      BL       LCD_Clear
-    233              LCD_ShowString(10, 10, "System Ready", BLACK, WHITE);
+    279              LCD_ShowString(10, 10, "System Ready", BLACK, WHITE);
    \   0000000C   0xF64F 0x70FF      MOVW     R0,#+65535
    \   00000010   0x9000             STR      R0,[SP, #+0]
    \   00000012   0x2300             MOVS     R3,#+0
-   \   00000014   0x.... 0x....      LDR.W    R2,??DataTable4_22
+   \   00000014   0x.... 0x....      LDR.W    R2,??DataTable4_25
    \   00000018   0x210A             MOVS     R1,#+10
    \   0000001A   0x200A             MOVS     R0,#+10
    \   0000001C   0x.... 0x....      BL       LCD_ShowString
    \   00000020   0xE078             B.N      ??Display_Task_0
-    234              
-    235              while(1) {
-    236                  // Update Uptime (1s interval)
-    237                  if (++tick_100ms >= 10) {
-    238                      uptime_sec++;
-    239                      tick_100ms = 0;
-    240                  }
-    241          
-    242                  // 1. Update Status/Timer Area (Only on change)
-    243                  if (current_state != prev_state || 
-    244                      (current_state == 2 && idle_counter != prev_idle) ||
-    245                      (current_state == 3 && suspicious_counter != prev_suspicious)) 
-    246                  {
-    247                      if (current_state == 1) {
-    248                           LCD_ShowString(10, 40, "STATUS: OCCUPIED  ", BLACK, WHITE);
-    249                           sprintf(str_buf, "VACANT: %d s      ", 0);
-    250                      } else if (current_state == 2) {
-    251                           LCD_ShowString(10, 40, "STATUS: VACANT    ", BLACK, WHITE);
-    252                           sprintf(str_buf, "VACANT: %d s      ", idle_counter);
-    253                      } else if (current_state == 3) {
-    254                           LCD_ShowString(10, 40, "STATUS: SUSPICIOUS", BLACK, WHITE);
-    255                           sprintf(str_buf, "SUSPIC: %d s      ", suspicious_counter);
-    256                      } else if (current_state == 4) {
+    280              
+    281              while(1) {
+    282                  // Update Uptime (1s interval)
+    283                  if (++tick_100ms >= 10) {
+    284                      uptime_sec++;
+    285                      tick_100ms = 0;
+    286                  }
+    287          
+    288                  // 1. Update Status/Timer Area (Only on change)
+    289                  if (current_state != prev_state || 
+    290                      (current_state == 2 && idle_counter != prev_idle) ||
+    291                      (current_state == 3 && suspicious_counter != prev_suspicious)) 
+    292                  {
+    293                      if (current_state == 1) {
+    294                           LCD_ShowString(10, 40, "STATUS: OCCUPIED  ", BLACK, WHITE);
+    295                           sprintf(str_buf, "VACANT: %d s      ", 0);
+    296                      } else if (current_state == 2) {
+    297                           LCD_ShowString(10, 40, "STATUS: VACANT    ", BLACK, WHITE);
+    298                           sprintf(str_buf, "VACANT: %d s      ", idle_counter);
+    299                      } else if (current_state == 3) {
+    300                           LCD_ShowString(10, 40, "STATUS: SUSPICIOUS", BLACK, WHITE);
+    301                           sprintf(str_buf, "SUSPIC: %d s      ", suspicious_counter);
+    302                      } else if (current_state == 4) {
    \                     ??Display_Task_1: (+1)
    \   00000022   0x....             LDR.N    R0,??DataTable4
    \   00000024   0x7800             LDRB     R0,[R0, #+0]
    \   00000026   0x2804             CMP      R0,#+4
    \   00000028   0xD122             BNE.N    ??Display_Task_2
-    257                           LCD_ShowString(10, 40, "STATUS: AWAY      ", BLACK, WHITE);
+    303                           LCD_ShowString(10, 40, "STATUS: AWAY      ", BLACK, WHITE);
    \   0000002A   0xF64F 0x70FF      MOVW     R0,#+65535
    \   0000002E   0x9000             STR      R0,[SP, #+0]
    \   00000030   0x2300             MOVS     R3,#+0
-   \   00000032   0x.... 0x....      LDR.W    R2,??DataTable4_23
+   \   00000032   0x.... 0x....      LDR.W    R2,??DataTable4_26
    \   00000036   0x2128             MOVS     R1,#+40
    \   00000038   0x200A             MOVS     R0,#+10
    \   0000003A   0x.... 0x....      BL       LCD_ShowString
-    258                           sprintf(str_buf, "User Away         ");
-   \   0000003E   0x.... 0x....      LDR.W    R1,??DataTable4_24
+    304                           sprintf(str_buf, "User Away         ");
+   \   0000003E   0x.... 0x....      LDR.W    R1,??DataTable4_27
    \   00000042   0xA803             ADD      R0,SP,#+12
    \   00000044   0x.... 0x....      BL       sprintf
    \   00000048   0xE012             B.N      ??Display_Task_2
-    259                      }
+    305                      }
    \                     ??Display_Task_3: (+1)
    \   0000004A   0x....             LDR.N    R0,??DataTable4
    \   0000004C   0x7800             LDRB     R0,[R0, #+0]
@@ -861,16 +935,16 @@ Warning[Pe550]: variable "msg" was set but never used
    \   00000052   0xF64F 0x70FF      MOVW     R0,#+65535
    \   00000056   0x9000             STR      R0,[SP, #+0]
    \   00000058   0x2300             MOVS     R3,#+0
-   \   0000005A   0x....             LDR.N    R2,??DataTable4_25
+   \   0000005A   0x....             LDR.N    R2,??DataTable4_28
    \   0000005C   0x2128             MOVS     R1,#+40
    \   0000005E   0x200A             MOVS     R0,#+10
    \   00000060   0x.... 0x....      BL       LCD_ShowString
    \   00000064   0x....             LDR.N    R0,??DataTable4_11
    \   00000066   0x6802             LDR      R2,[R0, #+0]
-   \   00000068   0x....             LDR.N    R1,??DataTable4_26
+   \   00000068   0x....             LDR.N    R1,??DataTable4_29
    \   0000006A   0xA803             ADD      R0,SP,#+12
    \   0000006C   0x.... 0x....      BL       sprintf
-    260                      LCD_ShowString(10, 70, str_buf, BLACK, WHITE);
+    306                      LCD_ShowString(10, 70, str_buf, BLACK, WHITE);
                                                     ^
 Warning[Pe167]: argument of type "char *" is incompatible with parameter of
           type "u8 *"
@@ -882,41 +956,41 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   0000007A   0x2146             MOVS     R1,#+70
    \   0000007C   0x200A             MOVS     R0,#+10
    \   0000007E   0x.... 0x....      BL       LCD_ShowString
-    261                      
-    262                      // Update tracking variables
-    263                      prev_state = current_state;
+    307                      
+    308                      // Update tracking variables
+    309                      prev_state = current_state;
    \   00000082   0x....             LDR.N    R0,??DataTable4
    \   00000084   0x7800             LDRB     R0,[R0, #+0]
-   \   00000086   0x....             LDR.N    R1,??DataTable4_27
+   \   00000086   0x....             LDR.N    R1,??DataTable4_30
    \   00000088   0x7008             STRB     R0,[R1, #+0]
-    264                      prev_idle = idle_counter;
+    310                      prev_idle = idle_counter;
    \   0000008A   0x....             LDR.N    R0,??DataTable4_10
    \   0000008C   0x6800             LDR      R0,[R0, #+0]
-   \   0000008E   0x....             LDR.N    R1,??DataTable4_28
+   \   0000008E   0x....             LDR.N    R1,??DataTable4_31
    \   00000090   0x6008             STR      R0,[R1, #+0]
-    265                      prev_suspicious = suspicious_counter;
+    311                      prev_suspicious = suspicious_counter;
    \   00000092   0x....             LDR.N    R0,??DataTable4_11
    \   00000094   0x6800             LDR      R0,[R0, #+0]
-   \   00000096   0x....             LDR.N    R1,??DataTable4_29
+   \   00000096   0x....             LDR.N    R1,??DataTable4_32
    \   00000098   0x6008             STR      R0,[R1, #+0]
-    266                  }
-    267                  
-    268                  // 2. Debug Output (PIR Value - Only on change)
-    269                  if (g_debug_pir_val != prev_pir_val) {
+    312                  }
+    313                  
+    314                  // 2. Debug Output (PIR Value - Only on change)
+    315                  if (g_debug_pir_val != prev_pir_val) {
    \                     ??Display_Task_4: (+1)
    \   0000009A   0x....             LDR.N    R0,??DataTable4_12
    \   0000009C   0x7800             LDRB     R0,[R0, #+0]
-   \   0000009E   0x....             LDR.N    R1,??DataTable4_30
+   \   0000009E   0x....             LDR.N    R1,??DataTable4_33
    \   000000A0   0x7809             LDRB     R1,[R1, #+0]
    \   000000A2   0x4288             CMP      R0,R1
    \   000000A4   0xD013             BEQ.N    ??Display_Task_5
-    270                      sprintf(debug_buf, "PIR:%d            ", g_debug_pir_val); // Spaces to clear old text
+    316                      sprintf(debug_buf, "PIR:%d            ", g_debug_pir_val); // Spaces to clear old text
    \   000000A6   0x....             LDR.N    R0,??DataTable4_12
    \   000000A8   0x7802             LDRB     R2,[R0, #+0]
-   \   000000AA   0x....             LDR.N    R1,??DataTable4_31
+   \   000000AA   0x....             LDR.N    R1,??DataTable4_34
    \   000000AC   0xA80B             ADD      R0,SP,#+44
    \   000000AE   0x.... 0x....      BL       sprintf
-    271                      LCD_ShowString(10, 100, debug_buf, RED, WHITE);
+    317                      LCD_ShowString(10, 100, debug_buf, RED, WHITE);
                                                      ^
 Warning[Pe167]: argument of type "char *" is incompatible with parameter of
           type "u8 *"
@@ -927,29 +1001,29 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   000000BE   0x2164             MOVS     R1,#+100
    \   000000C0   0x200A             MOVS     R0,#+10
    \   000000C2   0x.... 0x....      BL       LCD_ShowString
-    272                      prev_pir_val = g_debug_pir_val;
+    318                      prev_pir_val = g_debug_pir_val;
    \   000000C6   0x....             LDR.N    R0,??DataTable4_12
    \   000000C8   0x7800             LDRB     R0,[R0, #+0]
-   \   000000CA   0x....             LDR.N    R1,??DataTable4_30
+   \   000000CA   0x....             LDR.N    R1,??DataTable4_33
    \   000000CC   0x7008             STRB     R0,[R1, #+0]
-    273                  }
-    274          
-    275                  // 3. Uptime (Only on change - every 1s)
-    276                  if (uptime_sec != prev_uptime) {
+    319                  }
+    320          
+    321                  // 3. Uptime (Only on change - every 1s)
+    322                  if (uptime_sec != prev_uptime) {
    \                     ??Display_Task_5: (+1)
-   \   000000CE   0x....             LDR.N    R0,??DataTable4_32
+   \   000000CE   0x....             LDR.N    R0,??DataTable4_35
    \   000000D0   0x6800             LDR      R0,[R0, #+0]
-   \   000000D2   0x....             LDR.N    R1,??DataTable4_33
+   \   000000D2   0x....             LDR.N    R1,??DataTable4_36
    \   000000D4   0x6809             LDR      R1,[R1, #+0]
    \   000000D6   0x4288             CMP      R0,R1
    \   000000D8   0xD012             BEQ.N    ??Display_Task_6
-    277                      sprintf(str_buf, "UPTIME: %d s", uptime_sec);
-   \   000000DA   0x....             LDR.N    R0,??DataTable4_32
+    323                      sprintf(str_buf, "UPTIME: %d s", uptime_sec);
+   \   000000DA   0x....             LDR.N    R0,??DataTable4_35
    \   000000DC   0x6802             LDR      R2,[R0, #+0]
-   \   000000DE   0x....             LDR.N    R1,??DataTable4_34
+   \   000000DE   0x....             LDR.N    R1,??DataTable4_37
    \   000000E0   0xA803             ADD      R0,SP,#+12
    \   000000E2   0x.... 0x....      BL       sprintf
-    278                      LCD_ShowString(10, 130, str_buf, BLUE, WHITE);
+    324                      LCD_ShowString(10, 130, str_buf, BLUE, WHITE);
                                                      ^
 Warning[Pe167]: argument of type "char *" is incompatible with parameter of
           type "u8 *"
@@ -960,15 +1034,15 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   000000F0   0x2182             MOVS     R1,#+130
    \   000000F2   0x200A             MOVS     R0,#+10
    \   000000F4   0x.... 0x....      BL       LCD_ShowString
-    279                      prev_uptime = uptime_sec;
-   \   000000F8   0x....             LDR.N    R0,??DataTable4_32
+    325                      prev_uptime = uptime_sec;
+   \   000000F8   0x....             LDR.N    R0,??DataTable4_35
    \   000000FA   0x6800             LDR      R0,[R0, #+0]
-   \   000000FC   0x....             LDR.N    R1,??DataTable4_33
+   \   000000FC   0x....             LDR.N    R1,??DataTable4_36
    \   000000FE   0x6008             STR      R0,[R1, #+0]
-    280                  }
-    281          
-    282                  // Refresh Rate: 100ms
-    283                  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+    326                  }
+    327          
+    328                  // Refresh Rate: 100ms
+    329                  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
    \                     ??Display_Task_6: (+1)
    \   00000100   0xA802             ADD      R0,SP,#+8
    \   00000102   0x9001             STR      R0,[SP, #+4]
@@ -980,27 +1054,27 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   0000010E   0x2000             MOVS     R0,#+0
    \   00000110   0x.... 0x....      BL       OSTimeDlyHMSM
    \                     ??Display_Task_0: (+1)
-   \   00000114   0x....             LDR.N    R0,??DataTable4_35
+   \   00000114   0x....             LDR.N    R0,??DataTable4_38
    \   00000116   0x7800             LDRB     R0,[R0, #+0]
    \   00000118   0x1C40             ADDS     R0,R0,#+1
-   \   0000011A   0x....             LDR.N    R1,??DataTable4_35
+   \   0000011A   0x....             LDR.N    R1,??DataTable4_38
    \   0000011C   0x7008             STRB     R0,[R1, #+0]
-   \   0000011E   0x....             LDR.N    R0,??DataTable4_35
+   \   0000011E   0x....             LDR.N    R0,??DataTable4_38
    \   00000120   0x7800             LDRB     R0,[R0, #+0]
    \   00000122   0x280A             CMP      R0,#+10
    \   00000124   0xDB07             BLT.N    ??Display_Task_7
-   \   00000126   0x....             LDR.N    R0,??DataTable4_32
+   \   00000126   0x....             LDR.N    R0,??DataTable4_35
    \   00000128   0x6800             LDR      R0,[R0, #+0]
    \   0000012A   0x1C40             ADDS     R0,R0,#+1
-   \   0000012C   0x....             LDR.N    R1,??DataTable4_32
+   \   0000012C   0x....             LDR.N    R1,??DataTable4_35
    \   0000012E   0x6008             STR      R0,[R1, #+0]
    \   00000130   0x2000             MOVS     R0,#+0
-   \   00000132   0x....             LDR.N    R1,??DataTable4_35
+   \   00000132   0x....             LDR.N    R1,??DataTable4_38
    \   00000134   0x7008             STRB     R0,[R1, #+0]
    \                     ??Display_Task_7: (+1)
    \   00000136   0x....             LDR.N    R0,??DataTable4
    \   00000138   0x7800             LDRB     R0,[R0, #+0]
-   \   0000013A   0x....             LDR.N    R1,??DataTable4_27
+   \   0000013A   0x....             LDR.N    R1,??DataTable4_30
    \   0000013C   0x7809             LDRB     R1,[R1, #+0]
    \   0000013E   0x4288             CMP      R0,R1
    \   00000140   0xD113             BNE.N    ??Display_Task_8
@@ -1010,7 +1084,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000148   0xD105             BNE.N    ??Display_Task_9
    \   0000014A   0x....             LDR.N    R0,??DataTable4_10
    \   0000014C   0x6800             LDR      R0,[R0, #+0]
-   \   0000014E   0x....             LDR.N    R1,??DataTable4_28
+   \   0000014E   0x....             LDR.N    R1,??DataTable4_31
    \   00000150   0x6809             LDR      R1,[R1, #+0]
    \   00000152   0x4288             CMP      R0,R1
    \   00000154   0xD109             BNE.N    ??Display_Task_8
@@ -1021,7 +1095,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   0000015C   0xD19D             BNE.N    ??Display_Task_4
    \   0000015E   0x....             LDR.N    R0,??DataTable4_11
    \   00000160   0x6800             LDR      R0,[R0, #+0]
-   \   00000162   0x....             LDR.N    R1,??DataTable4_29
+   \   00000162   0x....             LDR.N    R1,??DataTable4_32
    \   00000164   0x6809             LDR      R1,[R1, #+0]
    \   00000166   0x4288             CMP      R0,R1
    \   00000168   0xD097             BEQ.N    ??Display_Task_4
@@ -1033,12 +1107,12 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000172   0xF64F 0x70FF      MOVW     R0,#+65535
    \   00000176   0x9000             STR      R0,[SP, #+0]
    \   00000178   0x2300             MOVS     R3,#+0
-   \   0000017A   0x....             LDR.N    R2,??DataTable4_36
+   \   0000017A   0x....             LDR.N    R2,??DataTable4_39
    \   0000017C   0x2128             MOVS     R1,#+40
    \   0000017E   0x200A             MOVS     R0,#+10
    \   00000180   0x.... 0x....      BL       LCD_ShowString
    \   00000184   0x2200             MOVS     R2,#+0
-   \   00000186   0x....             LDR.N    R1,??DataTable4_37
+   \   00000186   0x....             LDR.N    R1,??DataTable4_40
    \   00000188   0xA803             ADD      R0,SP,#+12
    \   0000018A   0x.... 0x....      BL       sprintf
    \   0000018E   0xE76F             B.N      ??Display_Task_2
@@ -1050,18 +1124,18 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   0000019A   0xF64F 0x70FF      MOVW     R0,#+65535
    \   0000019E   0x9000             STR      R0,[SP, #+0]
    \   000001A0   0x2300             MOVS     R3,#+0
-   \   000001A2   0x....             LDR.N    R2,??DataTable4_38
+   \   000001A2   0x....             LDR.N    R2,??DataTable4_41
    \   000001A4   0x2128             MOVS     R1,#+40
    \   000001A6   0x200A             MOVS     R0,#+10
    \   000001A8   0x.... 0x....      BL       LCD_ShowString
    \   000001AC   0x....             LDR.N    R0,??DataTable4_10
    \   000001AE   0x6802             LDR      R2,[R0, #+0]
-   \   000001B0   0x....             LDR.N    R1,??DataTable4_37
+   \   000001B0   0x....             LDR.N    R1,??DataTable4_40
    \   000001B2   0xA803             ADD      R0,SP,#+12
    \   000001B4   0x.... 0x....      BL       sprintf
    \   000001B8   0xE75A             B.N      ??Display_Task_2
-    284              }
-    285          }
+    330              }
+    331          }
 
    \                                 In section .bss, align 4
    \                     `Display_Task::uptime_sec`:
@@ -1090,16 +1164,16 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \                                 In section .data, align 4
    \                     `Display_Task::prev_uptime`:
    \   00000000   0x000000FF         DC32 255
-    286          
+    332          
 
    \                                 In section .text, align 2, keep-with-next
-    287          void Bluetooth_Task(void *p_arg) {
+    333          void Bluetooth_Task(void *p_arg) {
    \                     Bluetooth_Task: (+1)
    \   00000000   0xB5E0             PUSH     {R5-R7,LR}
-    288              OS_ERR err;
-    289              
-    290              while(1) {
-    291                   OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    334              OS_ERR err;
+    335              
+    336              while(1) {
+    337                   OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
    \                     ??Bluetooth_Task_0: (+1)
    \   00000002   0xA802             ADD      R0,SP,#+8
    \   00000004   0x9001             STR      R0,[SP, #+4]
@@ -1111,58 +1185,58 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000010   0x2000             MOVS     R0,#+0
    \   00000012   0x.... 0x....      BL       OSTimeDlyHMSM
    \   00000016   0xE7F4             B.N      ??Bluetooth_Task_0
-    292              }
-    293          }
-    294          
+    338              }
+    339          }
+    340          
 
    \                                 In section .text, align 2, keep-with-next
-    295          void AppTaskStart(void *p_arg) {
+    341          void AppTaskStart(void *p_arg) {
    \                     AppTaskStart: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
    \   00000002   0xB08A             SUB      SP,SP,#+40
-    296          	OS_ERR err;
-    297          	
-    298              BSP_Init(); 
+    342          	OS_ERR err;
+    343          	
+    344              BSP_Init(); 
    \   00000004   0x.... 0x....      BL       BSP_Init
-    299              
-    300              // Create RTOS Objects
-    301              OSQCreate(&PirDataQ, "PirQ", 10, &err);
+    345              
+    346              // Create RTOS Objects
+    347              OSQCreate(&PirDataQ, "PirQ", 10, &err);
    \   00000008   0xAB09             ADD      R3,SP,#+36
    \   0000000A   0x220A             MOVS     R2,#+10
-   \   0000000C   0x....             LDR.N    R1,??DataTable4_39
+   \   0000000C   0x....             LDR.N    R1,??DataTable4_42
    \   0000000E   0x....             LDR.N    R0,??DataTable4_6
    \   00000010   0x.... 0x....      BL       OSQCreate
-    302              OSQCreate(&StateQ, "StateQ", 10, &err);
+    348              OSQCreate(&StateQ, "StateQ", 10, &err);
    \   00000014   0xAB09             ADD      R3,SP,#+36
    \   00000016   0x220A             MOVS     R2,#+10
-   \   00000018   0x....             LDR.N    R1,??DataTable4_40
+   \   00000018   0x....             LDR.N    R1,??DataTable4_43
    \   0000001A   0x....             LDR.N    R0,??DataTable4_2
    \   0000001C   0x.... 0x....      BL       OSQCreate
-    303              OSQCreate(&ServoQ, "ServoQ", 5, &err);
+    349              OSQCreate(&ServoQ, "ServoQ", 5, &err);
    \   00000020   0xAB09             ADD      R3,SP,#+36
    \   00000022   0x2205             MOVS     R2,#+5
-   \   00000024   0x....             LDR.N    R1,??DataTable4_41
-   \   00000026   0x....             LDR.N    R0,??DataTable4_21
+   \   00000024   0x....             LDR.N    R1,??DataTable4_44
+   \   00000026   0x....             LDR.N    R0,??DataTable4_23
    \   00000028   0x.... 0x....      BL       OSQCreate
-    304              OSQCreate(&BluetoothRxQ, "BluetoothRxQ", 10, &err); 
+    350              OSQCreate(&BluetoothRxQ, "BluetoothRxQ", 10, &err); 
    \   0000002C   0xAB09             ADD      R3,SP,#+36
    \   0000002E   0x220A             MOVS     R2,#+10
-   \   00000030   0x....             LDR.N    R1,??DataTable4_42
-   \   00000032   0x....             LDR.N    R0,??DataTable4_43
+   \   00000030   0x....             LDR.N    R1,??DataTable4_45
+   \   00000032   0x....             LDR.N    R0,??DataTable4_46
    \   00000034   0x.... 0x....      BL       OSQCreate
-    305              
-    306              // Enable SysTick for OS Time (Critical for OSTimeDly to work)
-    307              OS_CPU_SysTickInit(SystemCoreClock / OS_CFG_TICK_RATE_HZ);
-   \   00000038   0x....             LDR.N    R0,??DataTable4_44
+    351              
+    352              // Enable SysTick for OS Time (Critical for OSTimeDly to work)
+    353              OS_CPU_SysTickInit(SystemCoreClock / OS_CFG_TICK_RATE_HZ);
+   \   00000038   0x....             LDR.N    R0,??DataTable4_47
    \   0000003A   0x6800             LDR      R0,[R0, #+0]
    \   0000003C   0xF44F 0x717A      MOV      R1,#+1000
    \   00000040   0xFBB0 0xF0F1      UDIV     R0,R0,R1
    \   00000044   0x.... 0x....      BL       OS_CPU_SysTickInit
-    308              
-    309              // Create Application Tasks
-    310              // Status Task (5), PIR Task (4)
-    311              // PIR Task Stack increased to 256
-    312              OSTaskCreate(&PirTaskTCB, "PIR Task", PIR_Task, 0, 4, &PirTaskStk[0], 25, 256, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+    354              
+    355              // Create Application Tasks
+    356              // Status Task (5), PIR Task (4)
+    357              // PIR Task Stack increased to 256
+    358              OSTaskCreate(&PirTaskTCB, "PIR Task", PIR_Task, 0, 4, &PirTaskStk[0], 25, 256, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
    \   00000048   0xA809             ADD      R0,SP,#+36
    \   0000004A   0x9008             STR      R0,[SP, #+32]
    \   0000004C   0x2003             MOVS     R0,#+3
@@ -1177,16 +1251,16 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000060   0x9003             STR      R0,[SP, #+12]
    \   00000062   0x2019             MOVS     R0,#+25
    \   00000064   0x9002             STR      R0,[SP, #+8]
-   \   00000066   0x....             LDR.N    R0,??DataTable4_45
+   \   00000066   0x....             LDR.N    R0,??DataTable4_48
    \   00000068   0x9001             STR      R0,[SP, #+4]
    \   0000006A   0x2004             MOVS     R0,#+4
    \   0000006C   0x9000             STR      R0,[SP, #+0]
    \   0000006E   0x2300             MOVS     R3,#+0
-   \   00000070   0x....             LDR.N    R2,??DataTable4_46
-   \   00000072   0x....             LDR.N    R1,??DataTable4_47
-   \   00000074   0x....             LDR.N    R0,??DataTable4_48
+   \   00000070   0x....             LDR.N    R2,??DataTable4_49
+   \   00000072   0x....             LDR.N    R1,??DataTable4_50
+   \   00000074   0x....             LDR.N    R0,??DataTable4_51
    \   00000076   0x.... 0x....      BL       OSTaskCreate
-    313              OSTaskCreate(&StatusTaskTCB, "Status Task", Status_Task, 0, 5, &StatusTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+    359              OSTaskCreate(&StatusTaskTCB, "Status Task", Status_Task, 0, 5, &StatusTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
    \   0000007A   0xA809             ADD      R0,SP,#+36
    \   0000007C   0x9008             STR      R0,[SP, #+32]
    \   0000007E   0x2003             MOVS     R0,#+3
@@ -1201,18 +1275,18 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000090   0x9003             STR      R0,[SP, #+12]
    \   00000092   0x200C             MOVS     R0,#+12
    \   00000094   0x9002             STR      R0,[SP, #+8]
-   \   00000096   0x....             LDR.N    R0,??DataTable4_49
+   \   00000096   0x....             LDR.N    R0,??DataTable4_52
    \   00000098   0x9001             STR      R0,[SP, #+4]
    \   0000009A   0x2005             MOVS     R0,#+5
    \   0000009C   0x9000             STR      R0,[SP, #+0]
    \   0000009E   0x2300             MOVS     R3,#+0
-   \   000000A0   0x....             LDR.N    R2,??DataTable4_50
-   \   000000A2   0x....             LDR.N    R1,??DataTable4_51
-   \   000000A4   0x....             LDR.N    R0,??DataTable4_52
+   \   000000A0   0x....             LDR.N    R2,??DataTable4_53
+   \   000000A2   0x....             LDR.N    R1,??DataTable4_54
+   \   000000A4   0x....             LDR.N    R0,??DataTable4_55
    \   000000A6   0x.... 0x....      BL       OSTaskCreate
-    314              
-    315              // Display Task (6) - Increased Stack
-    316              OSTaskCreate(&DisplayTaskTCB, "Display Task", Display_Task, 0, 6, &DisplayTaskStk[0], 12, 256, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+    360              
+    361              // Display Task (6) - Increased Stack
+    362              OSTaskCreate(&DisplayTaskTCB, "Display Task", Display_Task, 0, 6, &DisplayTaskStk[0], 12, 256, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
    \   000000AA   0xA809             ADD      R0,SP,#+36
    \   000000AC   0x9008             STR      R0,[SP, #+32]
    \   000000AE   0x2003             MOVS     R0,#+3
@@ -1227,18 +1301,18 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   000000C2   0x9003             STR      R0,[SP, #+12]
    \   000000C4   0x200C             MOVS     R0,#+12
    \   000000C6   0x9002             STR      R0,[SP, #+8]
-   \   000000C8   0x....             LDR.N    R0,??DataTable4_53
+   \   000000C8   0x....             LDR.N    R0,??DataTable4_56
    \   000000CA   0x9001             STR      R0,[SP, #+4]
    \   000000CC   0x2006             MOVS     R0,#+6
    \   000000CE   0x9000             STR      R0,[SP, #+0]
    \   000000D0   0x2300             MOVS     R3,#+0
-   \   000000D2   0x....             LDR.N    R2,??DataTable4_54
-   \   000000D4   0x....             LDR.N    R1,??DataTable4_55
-   \   000000D6   0x....             LDR.N    R0,??DataTable4_56
+   \   000000D2   0x....             LDR.N    R2,??DataTable4_57
+   \   000000D4   0x....             LDR.N    R1,??DataTable4_58
+   \   000000D6   0x....             LDR.N    R0,??DataTable4_59
    \   000000D8   0x.... 0x....      BL       OSTaskCreate
-    317              
-    318              // Servo Task (7)
-    319              OSTaskCreate(&ServoTaskTCB, "Servo Task", Servo_Task, 0, 7, &ServoTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+    363              
+    364              // Servo Task (7)
+    365              OSTaskCreate(&ServoTaskTCB, "Servo Task", Servo_Task, 0, 7, &ServoTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
    \   000000DC   0xA809             ADD      R0,SP,#+36
    \   000000DE   0x9008             STR      R0,[SP, #+32]
    \   000000E0   0x2003             MOVS     R0,#+3
@@ -1253,18 +1327,18 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   000000F2   0x9003             STR      R0,[SP, #+12]
    \   000000F4   0x200C             MOVS     R0,#+12
    \   000000F6   0x9002             STR      R0,[SP, #+8]
-   \   000000F8   0x....             LDR.N    R0,??DataTable4_57
+   \   000000F8   0x....             LDR.N    R0,??DataTable4_60
    \   000000FA   0x9001             STR      R0,[SP, #+4]
    \   000000FC   0x2007             MOVS     R0,#+7
    \   000000FE   0x9000             STR      R0,[SP, #+0]
    \   00000100   0x2300             MOVS     R3,#+0
-   \   00000102   0x....             LDR.N    R2,??DataTable4_58
-   \   00000104   0x....             LDR.N    R1,??DataTable4_59
-   \   00000106   0x....             LDR.N    R0,??DataTable4_60
+   \   00000102   0x....             LDR.N    R2,??DataTable4_61
+   \   00000104   0x....             LDR.N    R1,??DataTable4_62
+   \   00000106   0x....             LDR.N    R0,??DataTable4_63
    \   00000108   0x.... 0x....      BL       OSTaskCreate
-    320          
-    321              // BT Task (8) - Lower priority than Servo/Display to avoid conflict
-    322              OSTaskCreate(&BluetoothTaskTCB, "BT Task", Bluetooth_Task, 0, 8, &BluetoothTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+    366          
+    367              // BT Task (8) - Lower priority than Servo/Display to avoid conflict
+    368              OSTaskCreate(&BluetoothTaskTCB, "BT Task", Bluetooth_Task, 0, 8, &BluetoothTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
    \   0000010C   0xA809             ADD      R0,SP,#+36
    \   0000010E   0x9008             STR      R0,[SP, #+32]
    \   00000110   0x2003             MOVS     R0,#+3
@@ -1279,16 +1353,16 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000122   0x9003             STR      R0,[SP, #+12]
    \   00000124   0x200C             MOVS     R0,#+12
    \   00000126   0x9002             STR      R0,[SP, #+8]
-   \   00000128   0x....             LDR.N    R0,??DataTable4_61
+   \   00000128   0x....             LDR.N    R0,??DataTable4_64
    \   0000012A   0x9001             STR      R0,[SP, #+4]
    \   0000012C   0x2008             MOVS     R0,#+8
    \   0000012E   0x9000             STR      R0,[SP, #+0]
    \   00000130   0x2300             MOVS     R3,#+0
-   \   00000132   0x....             LDR.N    R2,??DataTable4_62
-   \   00000134   0x....             LDR.N    R1,??DataTable4_63
-   \   00000136   0x....             LDR.N    R0,??DataTable4_64
+   \   00000132   0x....             LDR.N    R2,??DataTable4_65
+   \   00000134   0x....             LDR.N    R1,??DataTable4_66
+   \   00000136   0x....             LDR.N    R0,??DataTable4_67
    \   00000138   0x.... 0x....      BL       OSTaskCreate
-    323          }
+    369          }
    \   0000013C   0xB00B             ADD      SP,SP,#+44
    \   0000013E   0xBD00             POP      {PC}             ;; return
 
@@ -1370,63 +1444,63 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_19:
-   \   00000000   0x........         DC32     MSG_TOUCH_RELEASE_CODE
+   \   00000000   0x........         DC32     `Status_Task::away_timer`
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_20:
-   \   00000000   0x........         DC32     ?_7
+   \   00000000   0x........         DC32     `Status_Task::action_triggered`
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_21:
-   \   00000000   0x........         DC32     ServoQ
+   \   00000000   0x........         DC32     MSG_TOUCH_RELEASE_CODE
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_22:
-   \   00000000   0x........         DC32     ?_8
+   \   00000000   0x........         DC32     ?_7
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_23:
-   \   00000000   0x........         DC32     ?_14
+   \   00000000   0x........         DC32     ServoQ
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_24:
-   \   00000000   0x........         DC32     ?_15
+   \   00000000   0x........         DC32     ?_8
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_25:
-   \   00000000   0x........         DC32     ?_12
+   \   00000000   0x........         DC32     ?_9
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_26:
-   \   00000000   0x........         DC32     ?_13
+   \   00000000   0x........         DC32     ?_15
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_27:
-   \   00000000   0x........         DC32     `Display_Task::prev_state`
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_28:
-   \   00000000   0x........         DC32     `Display_Task::prev_idle`
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_29:
-   \   00000000   0x........         DC32     `Display_Task::prev_suspicious`
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_30:
-   \   00000000   0x........         DC32     `Display_Task::prev_pir_val`
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_31:
    \   00000000   0x........         DC32     ?_16
 
    \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_28:
+   \   00000000   0x........         DC32     ?_13
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_29:
+   \   00000000   0x........         DC32     ?_14
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_30:
+   \   00000000   0x........         DC32     `Display_Task::prev_state`
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_31:
+   \   00000000   0x........         DC32     `Display_Task::prev_idle`
+
+   \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_32:
-   \   00000000   0x........         DC32     `Display_Task::uptime_sec`
+   \   00000000   0x........         DC32     `Display_Task::prev_suspicious`
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_33:
-   \   00000000   0x........         DC32     `Display_Task::prev_uptime`
+   \   00000000   0x........         DC32     `Display_Task::prev_pir_val`
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_34:
@@ -1434,122 +1508,134 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_35:
-   \   00000000   0x........         DC32     `Display_Task::tick_100ms`
+   \   00000000   0x........         DC32     `Display_Task::uptime_sec`
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_36:
-   \   00000000   0x........         DC32     ?_9
+   \   00000000   0x........         DC32     `Display_Task::prev_uptime`
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_37:
-   \   00000000   0x........         DC32     ?_10
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_38:
-   \   00000000   0x........         DC32     ?_11
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_39:
    \   00000000   0x........         DC32     ?_18
 
    \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_38:
+   \   00000000   0x........         DC32     `Display_Task::tick_100ms`
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_39:
+   \   00000000   0x........         DC32     ?_10
+
+   \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_40:
-   \   00000000   0x........         DC32     ?_19
+   \   00000000   0x........         DC32     ?_11
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_41:
-   \   00000000   0x........         DC32     ?_20
+   \   00000000   0x........         DC32     ?_12
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_42:
-   \   00000000   0x........         DC32     ?_21
+   \   00000000   0x........         DC32     ?_19
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_43:
-   \   00000000   0x........         DC32     BluetoothRxQ
+   \   00000000   0x........         DC32     ?_20
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_44:
-   \   00000000   0x........         DC32     SystemCoreClock
+   \   00000000   0x........         DC32     ?_21
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_45:
-   \   00000000   0x........         DC32     PirTaskStk
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_46:
-   \   00000000   0x........         DC32     PIR_Task
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_47:
    \   00000000   0x........         DC32     ?_22
 
    \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_46:
+   \   00000000   0x........         DC32     BluetoothRxQ
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_47:
+   \   00000000   0x........         DC32     SystemCoreClock
+
+   \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_48:
-   \   00000000   0x........         DC32     PirTaskTCB
+   \   00000000   0x........         DC32     PirTaskStk
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_49:
-   \   00000000   0x........         DC32     StatusTaskStk
+   \   00000000   0x........         DC32     PIR_Task
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_50:
-   \   00000000   0x........         DC32     Status_Task
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_51:
    \   00000000   0x........         DC32     ?_23
 
    \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_51:
+   \   00000000   0x........         DC32     PirTaskTCB
+
+   \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_52:
-   \   00000000   0x........         DC32     StatusTaskTCB
+   \   00000000   0x........         DC32     StatusTaskStk
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_53:
-   \   00000000   0x........         DC32     DisplayTaskStk
+   \   00000000   0x........         DC32     Status_Task
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_54:
-   \   00000000   0x........         DC32     Display_Task
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_55:
    \   00000000   0x........         DC32     ?_24
 
    \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_55:
+   \   00000000   0x........         DC32     StatusTaskTCB
+
+   \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_56:
-   \   00000000   0x........         DC32     DisplayTaskTCB
+   \   00000000   0x........         DC32     DisplayTaskStk
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_57:
-   \   00000000   0x........         DC32     ServoTaskStk
+   \   00000000   0x........         DC32     Display_Task
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_58:
-   \   00000000   0x........         DC32     Servo_Task
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_59:
    \   00000000   0x........         DC32     ?_25
 
    \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_59:
+   \   00000000   0x........         DC32     DisplayTaskTCB
+
+   \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_60:
-   \   00000000   0x........         DC32     ServoTaskTCB
+   \   00000000   0x........         DC32     ServoTaskStk
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_61:
-   \   00000000   0x........         DC32     BluetoothTaskStk
+   \   00000000   0x........         DC32     Servo_Task
 
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_62:
-   \   00000000   0x........         DC32     Bluetooth_Task
-
-   \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable4_63:
    \   00000000   0x........         DC32     ?_26
 
    \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_63:
+   \   00000000   0x........         DC32     ServoTaskTCB
+
+   \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable4_64:
+   \   00000000   0x........         DC32     BluetoothTaskStk
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_65:
+   \   00000000   0x........         DC32     Bluetooth_Task
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_66:
+   \   00000000   0x........         DC32     ?_27
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_67:
    \   00000000   0x........         DC32     BluetoothTaskTCB
 
    \                                 In section .rodata, align 4
@@ -1625,6 +1711,22 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
 
    \                                 In section .rodata, align 4
    \                     ?_8:
+   \   00000000   0x74 0x75          DC8 "turn off the light\015\012"
+   \              0x72 0x6E    
+   \              0x20 0x6F    
+   \              0x66 0x66    
+   \              0x20 0x74    
+   \              0x68 0x65    
+   \              0x20 0x6C    
+   \              0x69 0x67    
+   \              0x68 0x74    
+   \              0x0D 0x0A    
+   \              0x00         
+   \   00000015   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+
+   \                                 In section .rodata, align 4
+   \                     ?_9:
    \   00000000   0x53 0x79          DC8 "System Ready"
    \              0x73 0x74    
    \              0x65 0x6D    
@@ -1636,7 +1738,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \              0x00         
 
    \                                 In section .rodata, align 4
-   \                     ?_9:
+   \                     ?_10:
    \   00000000   0x53 0x54          DC8 "STATUS: OCCUPIED  "
    \              0x41 0x54    
    \              0x55 0x53    
@@ -1650,7 +1752,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_10:
+   \                     ?_11:
    \   00000000   0x56 0x41          DC8 "VACANT: %d s      "
    \              0x43 0x41    
    \              0x4E 0x54    
@@ -1664,7 +1766,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_11:
+   \                     ?_12:
    \   00000000   0x53 0x54          DC8 "STATUS: VACANT    "
    \              0x41 0x54    
    \              0x55 0x53    
@@ -1678,7 +1780,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_12:
+   \                     ?_13:
    \   00000000   0x53 0x54          DC8 "STATUS: SUSPICIOUS"
    \              0x41 0x54    
    \              0x55 0x53    
@@ -1692,7 +1794,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_13:
+   \                     ?_14:
    \   00000000   0x53 0x55          DC8 "SUSPIC: %d s      "
    \              0x53 0x50    
    \              0x49 0x43    
@@ -1706,7 +1808,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_14:
+   \                     ?_15:
    \   00000000   0x53 0x54          DC8 "STATUS: AWAY      "
    \              0x41 0x54    
    \              0x55 0x53    
@@ -1720,7 +1822,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_15:
+   \                     ?_16:
    \   00000000   0x55 0x73          DC8 "User Away         "
    \              0x65 0x72    
    \              0x20 0x41    
@@ -1734,7 +1836,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_16:
+   \                     ?_17:
    \   00000000   0x50 0x49          DC8 "PIR:%d            "
    \              0x52 0x3A    
    \              0x25 0x64    
@@ -1748,7 +1850,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000013   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_17:
+   \                     ?_18:
    \   00000000   0x55 0x50          DC8 "UPTIME: %d s"
    \              0x54 0x49    
    \              0x4D 0x45    
@@ -1760,7 +1862,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \              0x00         
 
    \                                 In section .rodata, align 4
-   \                     ?_18:
+   \                     ?_19:
    \   00000000   0x50 0x69          DC8 "PirQ"
    \              0x72 0x51    
    \              0x00         
@@ -1768,7 +1870,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \              0x00         
 
    \                                 In section .rodata, align 4
-   \                     ?_19:
+   \                     ?_20:
    \   00000000   0x53 0x74          DC8 "StateQ"
    \              0x61 0x74    
    \              0x65 0x51    
@@ -1776,7 +1878,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000007   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_20:
+   \                     ?_21:
    \   00000000   0x53 0x65          DC8 "ServoQ"
    \              0x72 0x76    
    \              0x6F 0x51    
@@ -1784,7 +1886,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   00000007   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_21:
+   \                     ?_22:
    \   00000000   0x42 0x6C          DC8 "BluetoothRxQ"
    \              0x75 0x65    
    \              0x74 0x6F    
@@ -1796,7 +1898,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \              0x00         
 
    \                                 In section .rodata, align 4
-   \                     ?_22:
+   \                     ?_23:
    \   00000000   0x50 0x49          DC8 "PIR Task"
    \              0x52 0x20    
    \              0x54 0x61    
@@ -1806,7 +1908,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \              0x00         
 
    \                                 In section .rodata, align 4
-   \                     ?_23:
+   \                     ?_24:
    \   00000000   0x53 0x74          DC8 "Status Task"
    \              0x61 0x74    
    \              0x75 0x73    
@@ -1815,7 +1917,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \              0x6B 0x00    
 
    \                                 In section .rodata, align 4
-   \                     ?_24:
+   \                     ?_25:
    \   00000000   0x44 0x69          DC8 "Display Task"
    \              0x73 0x70    
    \              0x6C 0x61    
@@ -1827,7 +1929,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \              0x00         
 
    \                                 In section .rodata, align 4
-   \                     ?_25:
+   \                     ?_26:
    \   00000000   0x53 0x65          DC8 "Servo Task"
    \              0x72 0x76    
    \              0x6F 0x20    
@@ -1837,7 +1939,7 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
    \   0000000B   0x00               DC8 0
 
    \                                 In section .rodata, align 4
-   \                     ?_26:
+   \                     ?_27:
    \   00000000   0x42 0x54          DC8 "BT Task"
    \              0x20 0x54    
    \              0x61 0x73    
@@ -1944,6 +2046,9 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
        4  ??DataTable4_62
        4  ??DataTable4_63
        4  ??DataTable4_64
+       4  ??DataTable4_65
+       4  ??DataTable4_66
+       4  ??DataTable4_67
        4  ??DataTable4_7
        4  ??DataTable4_8
        4  ??DataTable4_9
@@ -1956,24 +2061,25 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
       20  ?_14
       20  ?_15
       20  ?_16
-      16  ?_17
-       8  ?_18
+      20  ?_17
+      16  ?_18
        8  ?_19
        8  ?_2
        8  ?_20
-      16  ?_21
-      12  ?_22
+       8  ?_21
+      16  ?_22
       12  ?_23
-      16  ?_24
-      12  ?_25
-       8  ?_26
+      12  ?_24
+      16  ?_25
+      12  ?_26
+       8  ?_27
        8  ?_3
        8  ?_4
        8  ?_5
       12  ?_6
       20  ?_7
-      16  ?_8
-      20  ?_9
+      24  ?_8
+      16  ?_9
      320  AppTaskStart
       24  BluetoothRxQ
      512  BluetoothTaskStk
@@ -1991,11 +2097,13 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
       24  ServoQ
      512  ServoTaskStk
      168  ServoTaskTCB
-      68  Servo_Task
+     120  Servo_Task
       24  StateQ
      512  StatusTaskStk
      168  StatusTaskTCB
-     548  Status_Task
+     550  Status_Task
+       1  action_triggered
+       4  away_timer
        1  current_state
        1  g_debug_pir_val
        4  idle_counter
@@ -2013,14 +2121,14 @@ Warning[Pe167]: argument of type "char *" is incompatible with parameter of
        4  uptime_sec
 
  
- 4 536 bytes in section .bss
+ 4 541 bytes in section .bss
     17 bytes in section .data
-   378 bytes in section .rodata
- 2 078 bytes in section .text
+   402 bytes in section .rodata
+ 2 144 bytes in section .text
  
- 2 078 bytes of CODE  memory
-   378 bytes of CONST memory
- 4 553 bytes of DATA  memory
+ 2 144 bytes of CODE  memory
+   402 bytes of CONST memory
+ 4 558 bytes of DATA  memory
 
 Errors: none
 Warnings: 4
