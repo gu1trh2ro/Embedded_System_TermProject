@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Modern Light Scheme -->
+    <color name="colorPrimary">#455A64</color>  <!-- Blue Grey (Professional & Clean) -->
+    <color name="colorPrimaryDark">#263238</color>
+    <color name="colorAccent">#FFD700</color>   <!-- Gold (Maintained) -->
+
+    <!-- Backgrounds -->
+    <color name="colorBackground">#FAFAFA</color> <!-- Clean Off-White -->
+    <color name="colorSurface">#FFFFFF</color>
+
+    <!-- Status Colors -->
+    <color name="status_occupied">#FF6B6B</color> <!-- Soft Coral Red -->
+    <color name="status_occupied_bg">#FFF8F8</color> <!-- Very Pale Red Background -->
+    
+    <color name="status_empty">#4ECDC4</color>    <!-- Soft Mint/Teal -->
+    <color name="status_empty_bg">#F2FFFE</color> <!-- Very Pale Mint Background -->
+    
+    <color name="status_suspicious">#FFD93D</color> <!-- Warm Yellow -->
+    <color name="status_suspicious_bg">#FFFDF5</color> <!-- Very Pale Yellow Background -->
+
+    <color name="status_waiting">#9E9E9E</color> <!-- Neutral Grey -->
+    <color name="status_waiting_bg">#F5F5F5</color> <!-- Very Pale Grey Background -->
+
+    <!-- Text Colors -->
+    <color name="textPrimary">#263238</color> <!-- Dark Blue Grey for Text -->
+    <color name="textSecondary">#78909C</color>
+    <color name="textWhite">#FFFFFF</color>
+</resources>
