@@ -214,7 +214,8 @@ void BSP_Init(void) {
 
 void Servo_SetAngle(uint8_t angle) {
     uint16_t pulse = 500; // Default 0
-    if (angle == 90) pulse = 1500;
+    if (angle == 180) pulse = 2500;
+    else if (angle == 90) pulse = 1500;
     else if (angle == 0) pulse = 500;
     
     TIM_SetCompare1(TIM4, pulse);

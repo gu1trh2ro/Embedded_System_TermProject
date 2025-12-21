@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       21/Dec/2025  18:51:06
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       21/Dec/2025  21:37:00
 # Copyright 1999-2018 IAR Systems AB.
 #
 #    Cpu mode     =  thumb
@@ -8,7 +8,7 @@
 #    Source file  =  
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\bsp.c
 #    Command line =  
-#        -f C:\Users\pnu3\AppData\Local\Temp\EWC7AE.tmp
+#        -f C:\Users\pnu3\AppData\Local\Temp\EWAA6A.tmp
 #        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\bsp.c
 #        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
@@ -156,49 +156,49 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\bsp.c
    \   0000009A   0xF88D 0x0003      STRB     R0,[SP, #+3]
      47              GPIO_Init(GPIOA, &GPIO_InitStructure);
    \   0000009E   0x4669             MOV      R1,SP
-   \   000000A0   0x....             LDR.N    R0,??DataTable9_3  ;; 0x40010800
-   \   000000A2   0x.... 0x....      BL       GPIO_Init
+   \   000000A0   0x.... 0x....      LDR.W    R0,??DataTable9_3  ;; 0x40010800
+   \   000000A4   0x.... 0x....      BL       GPIO_Init
      48          
      49              /* USART1 RX (PA10) -> Input Pull-Up */
      50              GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-   \   000000A6   0xF44F 0x6080      MOV      R0,#+1024
-   \   000000AA   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+   \   000000A8   0xF44F 0x6080      MOV      R0,#+1024
+   \   000000AC   0xF8AD 0x0000      STRH     R0,[SP, #+0]
      51              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-   \   000000AE   0x2048             MOVS     R0,#+72
-   \   000000B0   0xF88D 0x0003      STRB     R0,[SP, #+3]
+   \   000000B0   0x2048             MOVS     R0,#+72
+   \   000000B2   0xF88D 0x0003      STRB     R0,[SP, #+3]
      52              GPIO_Init(GPIOA, &GPIO_InitStructure);
-   \   000000B4   0x4669             MOV      R1,SP
-   \   000000B6   0x....             LDR.N    R0,??DataTable9_3  ;; 0x40010800
-   \   000000B8   0x.... 0x....      BL       GPIO_Init
+   \   000000B6   0x4669             MOV      R1,SP
+   \   000000B8   0x....             LDR.N    R0,??DataTable9_3  ;; 0x40010800
+   \   000000BA   0x.... 0x....      BL       GPIO_Init
      53          
      54              /* USART2 TX (PA2) -> Alternate Function Push-Pull */
      55              GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-   \   000000BC   0x2004             MOVS     R0,#+4
-   \   000000BE   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+   \   000000BE   0x2004             MOVS     R0,#+4
+   \   000000C0   0xF8AD 0x0000      STRH     R0,[SP, #+0]
      56              GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-   \   000000C2   0x2003             MOVS     R0,#+3
-   \   000000C4   0xF88D 0x0002      STRB     R0,[SP, #+2]
+   \   000000C4   0x2003             MOVS     R0,#+3
+   \   000000C6   0xF88D 0x0002      STRB     R0,[SP, #+2]
      57              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-   \   000000C8   0x2018             MOVS     R0,#+24
-   \   000000CA   0xF88D 0x0003      STRB     R0,[SP, #+3]
+   \   000000CA   0x2018             MOVS     R0,#+24
+   \   000000CC   0xF88D 0x0003      STRB     R0,[SP, #+3]
      58              GPIO_Init(GPIOA, &GPIO_InitStructure);
-   \   000000CE   0x4669             MOV      R1,SP
-   \   000000D0   0x....             LDR.N    R0,??DataTable9_3  ;; 0x40010800
-   \   000000D2   0x.... 0x....      BL       GPIO_Init
+   \   000000D0   0x4669             MOV      R1,SP
+   \   000000D2   0x....             LDR.N    R0,??DataTable9_3  ;; 0x40010800
+   \   000000D4   0x.... 0x....      BL       GPIO_Init
      59          
      60              /* USART2 RX (PA3) -> Input Pull-Up */
      61              GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-   \   000000D6   0x2008             MOVS     R0,#+8
-   \   000000D8   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+   \   000000D8   0x2008             MOVS     R0,#+8
+   \   000000DA   0xF8AD 0x0000      STRH     R0,[SP, #+0]
      62              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-   \   000000DC   0x2048             MOVS     R0,#+72
-   \   000000DE   0xF88D 0x0003      STRB     R0,[SP, #+3]
+   \   000000DE   0x2048             MOVS     R0,#+72
+   \   000000E0   0xF88D 0x0003      STRB     R0,[SP, #+3]
      63              GPIO_Init(GPIOA, &GPIO_InitStructure);
-   \   000000E2   0x4669             MOV      R1,SP
-   \   000000E4   0x....             LDR.N    R0,??DataTable9_3  ;; 0x40010800
-   \   000000E6   0x.... 0x....      BL       GPIO_Init
+   \   000000E4   0x4669             MOV      R1,SP
+   \   000000E6   0x....             LDR.N    R0,??DataTable9_3  ;; 0x40010800
+   \   000000E8   0x.... 0x....      BL       GPIO_Init
      64          }
-   \   000000EA   0xBD01             POP      {R0,PC}          ;; return
+   \   000000EC   0xBD01             POP      {R0,PC}          ;; return
      65          
 
    \                                 In section .text, align 2, keep-with-next
@@ -567,34 +567,42 @@ Warning[Pe223]: function "LCD_Init" declared implicitly
    \   00000000   0xB580             PUSH     {R7,LR}
     216              uint16_t pulse = 500; // Default 0
    \   00000002   0xF44F 0x71FA      MOV      R1,#+500
-    217              if (angle == 90) pulse = 1500;
+    217              if (angle == 180) pulse = 2500;
    \   00000006   0x0002             MOVS     R2,R0
    \   00000008   0xB2D2             UXTB     R2,R2            ;; ZeroExt  R2,R2,#+24,#+24
-   \   0000000A   0x2A5A             CMP      R2,#+90
+   \   0000000A   0x2AB4             CMP      R2,#+180
    \   0000000C   0xD102             BNE.N    ??Servo_SetAngle_0
-   \   0000000E   0xF240 0x51DC      MOVW     R1,#+1500
-   \   00000012   0xE004             B.N      ??Servo_SetAngle_1
-    218              else if (angle == 0) pulse = 500;
+   \   0000000E   0xF640 0x11C4      MOVW     R1,#+2500
+   \   00000012   0xE00B             B.N      ??Servo_SetAngle_1
+    218              else if (angle == 90) pulse = 1500;
    \                     ??Servo_SetAngle_0: (+1)
-   \   00000014   0xB2C0             UXTB     R0,R0            ;; ZeroExt  R0,R0,#+24,#+24
-   \   00000016   0x2800             CMP      R0,#+0
-   \   00000018   0xD101             BNE.N    ??Servo_SetAngle_1
-   \   0000001A   0xF44F 0x71FA      MOV      R1,#+500
-    219              
-    220              TIM_SetCompare1(TIM4, pulse);
+   \   00000014   0x0002             MOVS     R2,R0
+   \   00000016   0xB2D2             UXTB     R2,R2            ;; ZeroExt  R2,R2,#+24,#+24
+   \   00000018   0x2A5A             CMP      R2,#+90
+   \   0000001A   0xD102             BNE.N    ??Servo_SetAngle_2
+   \   0000001C   0xF240 0x51DC      MOVW     R1,#+1500
+   \   00000020   0xE004             B.N      ??Servo_SetAngle_1
+    219              else if (angle == 0) pulse = 500;
+   \                     ??Servo_SetAngle_2: (+1)
+   \   00000022   0xB2C0             UXTB     R0,R0            ;; ZeroExt  R0,R0,#+24,#+24
+   \   00000024   0x2800             CMP      R0,#+0
+   \   00000026   0xD101             BNE.N    ??Servo_SetAngle_1
+   \   00000028   0xF44F 0x71FA      MOV      R1,#+500
+    220              
+    221              TIM_SetCompare1(TIM4, pulse);
    \                     ??Servo_SetAngle_1: (+1)
-   \   0000001E   0xB289             UXTH     R1,R1            ;; ZeroExt  R1,R1,#+16,#+16
-   \   00000020   0x....             LDR.N    R0,??DataTable9_5  ;; 0x40000800
-   \   00000022   0x.... 0x....      BL       TIM_SetCompare1
-    221          }
-   \   00000026   0xBD01             POP      {R0,PC}          ;; return
-    222          
+   \   0000002C   0xB289             UXTH     R1,R1            ;; ZeroExt  R1,R1,#+16,#+16
+   \   0000002E   0x....             LDR.N    R0,??DataTable9_5  ;; 0x40000800
+   \   00000030   0x.... 0x....      BL       TIM_SetCompare1
+    222          }
+   \   00000034   0xBD01             POP      {R0,PC}          ;; return
+    223          
 
    \                                 In section .text, align 2, keep-with-next
-    223          void LED_Set(uint8_t led, uint8_t state) {
+    224          void LED_Set(uint8_t led, uint8_t state) {
    \                     LED_Set: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    224              uint16_t pin = (led == 1) ? LED1_PIN : LED2_PIN;
+    225              uint16_t pin = (led == 1) ? LED1_PIN : LED2_PIN;
    \   00000002   0xB2C0             UXTB     R0,R0            ;; ZeroExt  R0,R0,#+24,#+24
    \   00000004   0x2801             CMP      R0,#+1
    \   00000006   0xD101             BNE.N    ??LED_Set_0
@@ -602,8 +610,8 @@ Warning[Pe223]: function "LCD_Init" declared implicitly
    \   0000000A   0xE000             B.N      ??LED_Set_1
    \                     ??LED_Set_0: (+1)
    \   0000000C   0x2010             MOVS     R0,#+16
-    225              // Assuming Active High for now as per common LED wiring on these pins
-    226              if (state) GPIO_SetBits(LED_PORT, pin);
+    226              // Assuming Active High for now as per common LED wiring on these pins
+    227              if (state) GPIO_SetBits(LED_PORT, pin);
    \                     ??LED_Set_1: (+1)
    \   0000000E   0xB2C9             UXTB     R1,R1            ;; ZeroExt  R1,R1,#+24,#+24
    \   00000010   0x2900             CMP      R1,#+0
@@ -613,96 +621,96 @@ Warning[Pe223]: function "LCD_Init" declared implicitly
    \   00000018   0x....             LDR.N    R0,??DataTable9_2  ;; 0x40011400
    \   0000001A   0x.... 0x....      BL       GPIO_SetBits
    \   0000001E   0xE004             B.N      ??LED_Set_3
-    227              else GPIO_ResetBits(LED_PORT, pin);
+    228              else GPIO_ResetBits(LED_PORT, pin);
    \                     ??LED_Set_2: (+1)
    \   00000020   0x0001             MOVS     R1,R0
    \   00000022   0xB289             UXTH     R1,R1            ;; ZeroExt  R1,R1,#+16,#+16
    \   00000024   0x....             LDR.N    R0,??DataTable9_2  ;; 0x40011400
    \   00000026   0x.... 0x....      BL       GPIO_ResetBits
-    228          }
+    229          }
    \                     ??LED_Set_3: (+1)
    \   0000002A   0xBD01             POP      {R0,PC}          ;; return
-    229          
+    230          
 
    \                                 In section .text, align 2, keep-with-next
-    230          uint16_t LightSensor_Read(void) {
+    231          uint16_t LightSensor_Read(void) {
    \                     LightSensor_Read: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    231              ADC_RegularChannelConfig(ADC1, LIGHT_ADC_CH, 1, ADC_SampleTime_55Cycles5);
+    232              ADC_RegularChannelConfig(ADC1, LIGHT_ADC_CH, 1, ADC_SampleTime_55Cycles5);
    \   00000002   0x2305             MOVS     R3,#+5
    \   00000004   0x2201             MOVS     R2,#+1
    \   00000006   0x210C             MOVS     R1,#+12
    \   00000008   0x....             LDR.N    R0,??DataTable9_4  ;; 0x40012400
    \   0000000A   0x.... 0x....      BL       ADC_RegularChannelConfig
-    232              ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    233              ADC_SoftwareStartConvCmd(ADC1, ENABLE);
    \   0000000E   0x2101             MOVS     R1,#+1
    \   00000010   0x....             LDR.N    R0,??DataTable9_4  ;; 0x40012400
    \   00000012   0x.... 0x....      BL       ADC_SoftwareStartConvCmd
-    233              while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC));
+    234              while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC));
    \                     ??LightSensor_Read_0: (+1)
    \   00000016   0x2102             MOVS     R1,#+2
    \   00000018   0x....             LDR.N    R0,??DataTable9_4  ;; 0x40012400
    \   0000001A   0x.... 0x....      BL       ADC_GetFlagStatus
    \   0000001E   0x2800             CMP      R0,#+0
    \   00000020   0xD0F9             BEQ.N    ??LightSensor_Read_0
-    234              return ADC_GetConversionValue(ADC1);
+    235              return ADC_GetConversionValue(ADC1);
    \   00000022   0x....             LDR.N    R0,??DataTable9_4  ;; 0x40012400
    \   00000024   0x.... 0x....      BL       ADC_GetConversionValue
    \   00000028   0xBD02             POP      {R1,PC}          ;; return
-    235          }
-    236          
+    236          }
+    237          
 
    \                                 In section .text, align 2, keep-with-next
-    237          uint8_t PIR_Read(void) {
+    238          uint8_t PIR_Read(void) {
    \                     PIR_Read: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    238              return GPIO_ReadInputDataBit(PIR_PORT, PIR_PIN);
+    239              return GPIO_ReadInputDataBit(PIR_PORT, PIR_PIN);
    \   00000002   0x2102             MOVS     R1,#+2
    \   00000004   0x....             LDR.N    R0,??DataTable9  ;; 0x40011000
    \   00000006   0x.... 0x....      BL       GPIO_ReadInputDataBit
    \   0000000A   0xBD02             POP      {R1,PC}          ;; return
-    239          }
-    240          
+    240          }
+    241          
 
    \                                 In section .text, align 2, keep-with-next
-    241          void Bluetooth_Send(uint8_t data) {
-    242          // Stub
-    243          }
+    242          void Bluetooth_Send(uint8_t data) {
+    243          // Stub
+    244          }
    \                     Bluetooth_Send: (+1)
    \   00000000   0x4770             BX       LR               ;; return
-    244          
+    245          
 
    \                                 In section .text, align 2, keep-with-next
-    245          void Bluetooth_SendString(char *str) {
+    246          void Bluetooth_SendString(char *str) {
    \                     Bluetooth_SendString: (+1)
    \   00000000   0xB51C             PUSH     {R2-R4,LR}
    \   00000002   0x0004             MOVS     R4,R0
-    246              char *p = str;
+    247              char *p = str;
    \   00000004   0xE015             B.N      ??Bluetooth_SendString_0
-    247              volatile uint32_t timeout;
-    248              
-    249              // Send to Bluetooth (USART2) Only
-    250              while (*p) {
-    251                  timeout = 0;
+    248              volatile uint32_t timeout;
+    249              
+    250              // Send to Bluetooth (USART2) Only
+    251              while (*p) {
+    252                  timeout = 0;
    \                     ??Bluetooth_SendString_1: (+1)
    \   00000006   0x2000             MOVS     R0,#+0
    \   00000008   0x9000             STR      R0,[SP, #+0]
-    252                  // Wait for TX Empty (TXE)
-    253                  while ((USART2->SR & USART_SR_TXE) == 0) {
+    253                  // Wait for TX Empty (TXE)
+    254                  while ((USART2->SR & USART_SR_TXE) == 0) {
    \                     ??Bluetooth_SendString_2: (+1)
    \   0000000A   0x....             LDR.N    R0,??DataTable9_7  ;; 0x40004400
    \   0000000C   0x8800             LDRH     R0,[R0, #+0]
    \   0000000E   0x0600             LSLS     R0,R0,#+24
    \   00000010   0xD405             BMI.N    ??Bluetooth_SendString_3
-    254                      if (++timeout > 300000) break; // Timeout increased for 9600bps
+    255                      if (++timeout > 300000) break; // Timeout increased for 9600bps
    \   00000012   0x9800             LDR      R0,[SP, #+0]
    \   00000014   0x1C40             ADDS     R0,R0,#+1
    \   00000016   0x9000             STR      R0,[SP, #+0]
    \   00000018   0x....             LDR.N    R1,??DataTable9_8  ;; 0x493e1
    \   0000001A   0x4288             CMP      R0,R1
    \   0000001C   0xD3F5             BCC.N    ??Bluetooth_SendString_2
-    255                  }
-    256                  if (timeout <= 300000) USART_SendData(USART2, *p);
+    256                  }
+    257                  if (timeout <= 300000) USART_SendData(USART2, *p);
    \                     ??Bluetooth_SendString_3: (+1)
    \   0000001E   0x9800             LDR      R0,[SP, #+0]
    \   00000020   0x....             LDR.N    R1,??DataTable9_8  ;; 0x493e1
@@ -712,21 +720,21 @@ Warning[Pe223]: function "LCD_Init" declared implicitly
    \   00000028   0xB289             UXTH     R1,R1            ;; ZeroExt  R1,R1,#+16,#+16
    \   0000002A   0x....             LDR.N    R0,??DataTable9_7  ;; 0x40004400
    \   0000002C   0x.... 0x....      BL       USART_SendData
-    257                  
-    258                  p++;
+    258                  
+    259                  p++;
    \                     ??Bluetooth_SendString_4: (+1)
    \   00000030   0x1C64             ADDS     R4,R4,#+1
-    259              }
+    260              }
    \                     ??Bluetooth_SendString_0: (+1)
    \   00000032   0x7820             LDRB     R0,[R4, #+0]
    \   00000034   0x2800             CMP      R0,#+0
    \   00000036   0xD1E6             BNE.N    ??Bluetooth_SendString_1
-    260              
-    261              // Space separator
-    262              timeout = 0;
+    261              
+    262              // Space separator
+    263              timeout = 0;
    \   00000038   0x2000             MOVS     R0,#+0
    \   0000003A   0x9000             STR      R0,[SP, #+0]
-    263              while ((USART2->SR & USART_SR_TXE) == 0) { if (++timeout > 300000) break; }
+    264              while ((USART2->SR & USART_SR_TXE) == 0) { if (++timeout > 300000) break; }
    \                     ??Bluetooth_SendString_5: (+1)
    \   0000003C   0x....             LDR.N    R0,??DataTable9_7  ;; 0x40004400
    \   0000003E   0x8800             LDRH     R0,[R0, #+0]
@@ -738,7 +746,7 @@ Warning[Pe223]: function "LCD_Init" declared implicitly
    \   0000004A   0x....             LDR.N    R1,??DataTable9_8  ;; 0x493e1
    \   0000004C   0x4288             CMP      R0,R1
    \   0000004E   0xD3F5             BCC.N    ??Bluetooth_SendString_5
-    264              if (timeout <= 300000) USART_SendData(USART2, ' ');
+    265              if (timeout <= 300000) USART_SendData(USART2, ' ');
    \                     ??Bluetooth_SendString_6: (+1)
    \   00000050   0x9800             LDR      R0,[SP, #+0]
    \   00000052   0x....             LDR.N    R1,??DataTable9_8  ;; 0x493e1
@@ -747,7 +755,7 @@ Warning[Pe223]: function "LCD_Init" declared implicitly
    \   00000058   0x2120             MOVS     R1,#+32
    \   0000005A   0x....             LDR.N    R0,??DataTable9_7  ;; 0x40004400
    \   0000005C   0x.... 0x....      BL       USART_SendData
-    265          }
+    266          }
    \                     ??Bluetooth_SendString_7: (+1)
    \   00000060   0xBD13             POP      {R0,R1,R4,PC}    ;; return
 
@@ -867,21 +875,21 @@ Warning[Pe223]: function "LCD_Init" declared implicitly
        2  Bluetooth_Send
       98  Bluetooth_SendString
       40  EXTI_Configuration
-     236  GPIO_Configuration
+     238  GPIO_Configuration
       44  LED_Set
       42  LightSensor_Read
       94  NVIC_Configuration
       12  PIR_Read
-      40  Servo_SetAngle
+      54  Servo_SetAngle
      106  TIM_Configuration
       72  USART1_Init
       72  USART2_Init
        2  USART_Configuration
 
  
- 1 034 bytes in section .text
+ 1 050 bytes in section .text
  
- 1 034 bytes of CODE memory
+ 1 050 bytes of CODE memory
 
 Errors: none
 Warnings: 1

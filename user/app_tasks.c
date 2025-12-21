@@ -50,8 +50,21 @@ void PIR_Task(void *p_arg) {
     uint8_t state_msg = 0;
 
 	while(1) {
-        // --- 1. PIR Sensor Handling ---
-        pir_val = PIR_Read();
+        // --- 1. PIR Sensor Handling (Debounced 0.5s) ---
+        uint8_t raw_pir = PIR_Read();
+        static uint8_t pir_stable_cnt = 0;
+        
+        if (raw_pir == 1) {
+            if (pir_stable_cnt < 10) { // 10 * 50ms = 500ms
+                pir_stable_cnt++;
+            }
+        } else {
+             pir_stable_cnt = 0;
+        }
+        
+        // Filter: Only treat as Active if stable for 0.5s
+        pir_val = (pir_stable_cnt >= 10) ? 1 : 0;
+
         g_debug_pir_val = pir_val;
         
         if (pir_val != prev_pir_val) {
@@ -228,9 +241,9 @@ void Servo_Task(void *p_arg) {
     OS_MSG_SIZE size;
     
     // --- One-time Run for Verification ---
-    Servo_SetAngle(90);
+    Servo_SetAngle(180);
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    Servo_SetAngle(0);
+    Servo_SetAngle(90);
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     // -------------------------------------
 
@@ -238,9 +251,9 @@ void Servo_Task(void *p_arg) {
         msg = OSQPend(&ServoQ, 0, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
         if (err == OS_ERR_NONE) {
             // Wave Flag
-            Servo_SetAngle(90);
+            Servo_SetAngle(180);
             OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-            Servo_SetAngle(0);
+            Servo_SetAngle(90);
         }
     }
 }
@@ -317,9 +330,23 @@ void Display_Task(void *p_arg) {
 
 void Bluetooth_Task(void *p_arg) {
     OS_ERR err;
+    void *msg;
+    OS_MSG_SIZE size;
     
     while(1) {
-         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+         // Wait for ANY data from App (Handshake/Status Request)
+         msg = OSQPend(&BluetoothRxQ, 0, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
+         
+         if (err == OS_ERR_NONE) {
+             // If any data received, report current status immediately
+             if (current_state == 1) {
+                 Bluetooth_SendString("OCCUPIED\r\n");
+             } else if (current_state == 2) {
+                 Bluetooth_SendString("EMPTY\r\n");
+             } else if (current_state == 4) {
+                 Bluetooth_SendString("AWAY\r\n");
+             }
+         }
     }
 }
 
