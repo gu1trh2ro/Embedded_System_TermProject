@@ -35,6 +35,7 @@ volatile uint32_t suspicious_counter = 0;
 volatile uint8_t current_state = 1; // 1: Occupied, 2: Vacant, 3: Suspicious
 
 volatile uint8_t g_debug_pir_val = 0; // GLOBAL DEBUG VARIABLE
+volatile uint8_t g_touch_event = 0;   // Set by EXTI0_IRQHandler
 
 // --- Tasks ---
 
@@ -44,8 +45,8 @@ void PIR_Task(void *p_arg) {
     static uint8_t prev_pir_val = 255; 
     
     // Touch Sensor Variables
-    uint8_t touch_val = 0;
-    static uint8_t prev_touch_val = 0;
+    // uint8_t touch_val = 0; // Removed (Interrupt Used)
+    // static uint8_t prev_touch_val = 0; // Removed
     uint8_t state_msg = 0;
 
 	while(1) {
@@ -84,36 +85,34 @@ void PIR_Task(void *p_arg) {
              }
         }
 
-        // --- 2. Touch Sensor Handling ---
-        // Reading TOUCH_PIN which is now mapped to PC0
-        touch_val = GPIO_ReadInputDataBit(TOUCH_PORT, TOUCH_PIN);
+        // --- 2. Touch Sensor Handling (Interrupt Driven) ---
+        // Check Global Flag set by ISR
         
-        if (touch_val != prev_touch_val) {
-            if (touch_val == 1) { // 1 = Pressed
-                 // Toggle Away Mode
-                 if (current_state == 4) {
-                     // Currently Away -> Back to Occupied
-                     current_state = 1;
-                     Bluetooth_SendString("BACK\r\n");
-                     state_msg = current_state;
-                     OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-                 } else {
-                     // Currently Occupied/Vacant/Suspicious -> Set to Away
-                     current_state = 4;
-                     Bluetooth_SendString("AWAY\r\n");
-                     state_msg = current_state;
-                     OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-                 }
-                 
-                 // Reset Status Task Counters (Fix for Away Timer accumulation)
-                 uint8_t reset_msg = MSG_TOUCH_RESET_CODE;
-                 OSQPost(&PirDataQ, &reset_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
-                 
-                 idle_counter = 0;
-                 suspicious_counter = 0;
-            } 
-            prev_touch_val = touch_val;
-        }
+        if (g_touch_event == 1) {
+             g_touch_event = 0; // Clear Flag
+             
+             // Toggle Away Mode
+             if (current_state == 4) {
+                 // Currently Away -> Back to Occupied
+                 current_state = 1;
+                 Bluetooth_SendString("BACK\r\n");
+                 state_msg = current_state;
+                 OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+             } else {
+                 // Currently Occupied/Vacant/Suspicious -> Set to Away
+                 current_state = 4;
+                 Bluetooth_SendString("AWAY\r\n");
+                 state_msg = current_state;
+                 OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+             }
+             
+             // Reset Status Task Counters (Fix for Away Timer accumulation)
+             uint8_t reset_msg = MSG_TOUCH_RESET_CODE;
+             OSQPost(&PirDataQ, &reset_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+             
+             idle_counter = 0;
+             suspicious_counter = 0;
+        } 
 
 		OSTimeDlyHMSM(0, 0, 0, 50, OS_OPT_TIME_HMSM_STRICT, &err);
 	}

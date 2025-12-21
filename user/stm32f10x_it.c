@@ -20,6 +20,9 @@ extern OS_Q   BluetoothRxQ; // 수신된 블루투스 데이터를 Bluetooth_Tas
 extern const uint8_t MSG_TOUCH_RESET_CODE; // main.c의 상수를 extern 선언
 extern const uint8_t MSG_TOUCH_RELEASE_CODE;
 
+// Global Event Flags
+extern volatile uint8_t g_touch_event;
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -119,17 +122,17 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief  This function handles EXTI Line 2 interrupt request (Touch Sensor: PC.2).
-  * (5단계: 수동 제어 - Status_Task에 즉시 처리 요청)
+  * @brief  This function handles EXTI Line 0 interrupt request (Touch Sensor: PC.0).
+  * (Touch Press -> Set Event Flag)
   */
-void EXTI2_IRQHandler(void)
+void EXTI0_IRQHandler(void)
 {
-    // Polling Method Used in PIR_Task instead of Interrupts
-    // to ensure reliable Bluetooth transmission without Queue Flooding.
-    
-    if (EXTI_GetITStatus(EXTI_Line2) != RESET)
+    if (EXTI_GetITStatus(EXTI_Line0) != RESET)
     {
-        EXTI_ClearITPendingBit(EXTI_Line2);
+        // Set Global Touch Event Flag
+        g_touch_event = 1;
+        
+        EXTI_ClearITPendingBit(EXTI_Line0);
     }
 }
 

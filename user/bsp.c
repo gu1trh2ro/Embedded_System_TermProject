@@ -119,29 +119,25 @@ void TIM_Configuration(void) {
 void EXTI_Configuration(void) {
     EXTI_InitTypeDef EXTI_InitStructure;
     
-    // Touch Interrupt Config Disabled (Using Polling)
-    /*
+    // Touch Sensor (PC0) Interrupt Config
     GPIO_EXTILineConfig(TOUCH_PortSource, TOUCH_PinSource);
 
-    EXTI_InitStructure.EXTI_Line = TOUCH_EXTI_Line;
+    EXTI_InitStructure.EXTI_Line = TOUCH_EXTI_Line; // EXTI_Line0
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling; 
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; // Interrupt on Press (Rising Edge)
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
-    */
 }
 
 void NVIC_Configuration(void) {
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    // Touch Interrupt Disabled
-    /*
-    NVIC_InitStructure.NVIC_IRQChannel = TOUCH_IRQn;
+    // Touch Interrupt Enable (EXTI0)
+    NVIC_InitStructure.NVIC_IRQChannel = TOUCH_IRQn; // EXTI0_IRQn
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F; 
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-    */
 
     /* USART1 Interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;

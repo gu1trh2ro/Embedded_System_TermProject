@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       21/Dec/2025  14:50:45
+# IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM       21/Dec/2025  18:04:38
 # Copyright 1999-2018 IAR Systems AB.
 #
 #    Cpu mode     =  thumb
@@ -8,7 +8,7 @@
 #    Source file  =  
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\stm32f10x_it.c
 #    Command line =  
-#        -f C:\Users\pnu3\AppData\Local\Temp\EWBB8C.tmp
+#        -f C:\Users\pnu3\AppData\Local\Temp\EW3D4E.tmp
 #        (C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\stm32f10x_it.c
 #        -D USE_STDPERIPH_DRIVER -D STM32F10X_CL -lC
 #        C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\Debug\List
@@ -77,349 +77,359 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\stm32f10x_it.
      20          extern const uint8_t MSG_TOUCH_RESET_CODE; // main.c???@@@?extern ?@@
      21          extern const uint8_t MSG_TOUCH_RELEASE_CODE;
      22          
-     23          /* Private typedef -----------------------------------------------------------*/
-     24          /* Private define ------------------------------------------------------------*/
-     25          /* Private macro -------------------------------------------------------------*/
-     26          /* Private variables ---------------------------------------------------------*/
-     27          /* Private function prototypes -----------------------------------------------*/
-     28          /* Private functions ---------------------------------------------------------*/
-     29          
-     30          /******************************************************************************/
-     31          /* Cortex-M3 Processor Exceptions Handlers                             */
-     32          /******************************************************************************/
-     33          
-     34          /**
-     35            * @brief  This function handles NMI exception.
-     36            */
+     23          // Global Event Flags
+     24          extern volatile uint8_t g_touch_event;
+     25          
+     26          /* Private typedef -----------------------------------------------------------*/
+     27          /* Private define ------------------------------------------------------------*/
+     28          /* Private macro -------------------------------------------------------------*/
+     29          /* Private variables ---------------------------------------------------------*/
+     30          /* Private function prototypes -----------------------------------------------*/
+     31          /* Private functions ---------------------------------------------------------*/
+     32          
+     33          /******************************************************************************/
+     34          /* Cortex-M3 Processor Exceptions Handlers                             */
+     35          /******************************************************************************/
+     36          
+     37          /**
+     38            * @brief  This function handles NMI exception.
+     39            */
 
    \                                 In section .text, align 2, keep-with-next
-     37          void NMI_Handler(void)
-     38          {
-     39          }
+     40          void NMI_Handler(void)
+     41          {
+     42          }
    \                     NMI_Handler: (+1)
    \   00000000   0x4770             BX       LR               ;; return
-     40          
-     41          /**
-     42            * @brief  This function handles Hard Fault exception.
-     43            */
+     43          
+     44          /**
+     45            * @brief  This function handles Hard Fault exception.
+     46            */
 
    \                                 In section .text, align 2, keep-with-next
-     44          void HardFault_Handler(void)
-     45          {
-     46            /* Go to infinite loop when Hard Fault exception occurs */
-     47            while (1)
+     47          void HardFault_Handler(void)
+     48          {
+     49            /* Go to infinite loop when Hard Fault exception occurs */
+     50            while (1)
    \                     HardFault_Handler: (+1)
    \                     ??HardFault_Handler_0: (+1)
    \   00000000   0xE7FE             B.N      ??HardFault_Handler_0
-     48            {
-     49            }
-     50          }
-     51          
-     52          /**
-     53            * @brief  This function handles Memory Manage exception.
-     54            */
+     51            {
+     52            }
+     53          }
+     54          
+     55          /**
+     56            * @brief  This function handles Memory Manage exception.
+     57            */
 
    \                                 In section .text, align 2, keep-with-next
-     55          void MemManage_Handler(void)
-     56          {
-     57            /* Go to infinite loop when Memory Manage exception occurs */
-     58            while (1)
+     58          void MemManage_Handler(void)
+     59          {
+     60            /* Go to infinite loop when Memory Manage exception occurs */
+     61            while (1)
    \                     MemManage_Handler: (+1)
    \                     ??MemManage_Handler_0: (+1)
    \   00000000   0xE7FE             B.N      ??MemManage_Handler_0
-     59            {
-     60            }
-     61          }
-     62          
-     63          /**
-     64            * @brief  This function handles Bus Fault exception.
-     65            */
+     62            {
+     63            }
+     64          }
+     65          
+     66          /**
+     67            * @brief  This function handles Bus Fault exception.
+     68            */
 
    \                                 In section .text, align 2, keep-with-next
-     66          void BusFault_Handler(void)
-     67          {
-     68            /* Go to infinite loop when Bus Fault exception occurs */
-     69            while (1)
+     69          void BusFault_Handler(void)
+     70          {
+     71            /* Go to infinite loop when Bus Fault exception occurs */
+     72            while (1)
    \                     BusFault_Handler: (+1)
    \                     ??BusFault_Handler_0: (+1)
    \   00000000   0xE7FE             B.N      ??BusFault_Handler_0
-     70            {
-     71            }
-     72          }
-     73          
-     74          /**
-     75            * @brief  This function handles Usage Fault exception.
-     76            */
+     73            {
+     74            }
+     75          }
+     76          
+     77          /**
+     78            * @brief  This function handles Usage Fault exception.
+     79            */
 
    \                                 In section .text, align 2, keep-with-next
-     77          void UsageFault_Handler(void)
-     78          {
-     79            /* Go to infinite loop when Usage Fault exception occurs */
-     80            while (1)
+     80          void UsageFault_Handler(void)
+     81          {
+     82            /* Go to infinite loop when Usage Fault exception occurs */
+     83            while (1)
    \                     UsageFault_Handler: (+1)
    \                     ??UsageFault_Handler_0: (+1)
    \   00000000   0xE7FE             B.N      ??UsageFault_Handler_0
-     81            {
-     82            }
-     83          }
-     84          
-     85          /**
-     86            * @brief  This function handles SVCall exception.
-     87            */
+     84            {
+     85            }
+     86          }
+     87          
+     88          /**
+     89            * @brief  This function handles SVCall exception.
+     90            */
 
    \                                 In section .text, align 2, keep-with-next
-     88          void SVC_Handler(void)
-     89          {
-     90          }
+     91          void SVC_Handler(void)
+     92          {
+     93          }
    \                     SVC_Handler: (+1)
    \   00000000   0x4770             BX       LR               ;; return
-     91          
-     92          /**
-     93            * @brief  This function handles Debug Monitor exception.
-     94            */
+     94          
+     95          /**
+     96            * @brief  This function handles Debug Monitor exception.
+     97            */
 
    \                                 In section .text, align 2, keep-with-next
-     95          void DebugMon_Handler(void)
-     96          {
-     97          }
+     98          void DebugMon_Handler(void)
+     99          {
+    100          }
    \                     DebugMon_Handler: (+1)
    \   00000000   0x4770             BX       LR               ;; return
-     98          
-     99          /**
-    100            * @brief  This function handles PendSVC exception.
-    101            */
+    101          
+    102          /**
+    103            * @brief  This function handles PendSVC exception.
+    104            */
 
    \                                 In section .text, align 2, keep-with-next
-    102          void PendSV_Handler(void)
-    103          {
+    105          void PendSV_Handler(void)
+    106          {
    \                     PendSV_Handler: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    104              // @C/OS-III??@@@?@@ ?@@@??@@?
-    105              OS_CPU_PendSVHandler(); 
+    107              // @C/OS-III??@@@?@@ ?@@@??@@?
+    108              OS_CPU_PendSVHandler(); 
    \   00000002   0x.... 0x....      BL       OS_CPU_PendSVHandler
-    106          }
+    109          }
    \   00000006   0xBD01             POP      {R0,PC}          ;; return
-    107          
-    108          /**
-    109            * @brief  This function handles SysTick Handler.
-    110            */
+    110          
+    111          /**
+    112            * @brief  This function handles SysTick Handler.
+    113            */
 
    \                                 In section .text, align 2, keep-with-next
-    111          void SysTick_Handler(void)
-    112          {
+    114          void SysTick_Handler(void)
+    115          {
    \                     SysTick_Handler: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    113              // @C/OS-III???@@?????@@?
-    114              OS_CPU_SysTickHandler(); 
+    116              // @C/OS-III???@@?????@@?
+    117              OS_CPU_SysTickHandler(); 
    \   00000002   0x.... 0x....      BL       OS_CPU_SysTickHandler
-    115          }
+    118          }
    \   00000006   0xBD01             POP      {R0,PC}          ;; return
-    116          
-    117          /******************************************************************************/
-    118          /* STM32F10x Peripherals Interrupt Handlers                          */
-    119          /******************************************************************************/
-    120          
-    121          /**
-    122            * @brief  This function handles EXTI Line 2 interrupt request (Touch Sensor: PC.2).
-    123            * (5?@@: ?@@ ?@@ - Status_Task??@@@ @@@ ?@@)
-    124            */
+    119          
+    120          /******************************************************************************/
+    121          /* STM32F10x Peripherals Interrupt Handlers                          */
+    122          /******************************************************************************/
+    123          
+    124          /**
+    125            * @brief  This function handles EXTI Line 0 interrupt request (Touch Sensor: PC.0).
+    126            * (Touch Press -> Set Event Flag)
+    127            */
 
    \                                 In section .text, align 2, keep-with-next
-    125          void EXTI2_IRQHandler(void)
-    126          {
-   \                     EXTI2_IRQHandler: (+1)
+    128          void EXTI0_IRQHandler(void)
+    129          {
+   \                     EXTI0_IRQHandler: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    127              // Polling Method Used in PIR_Task instead of Interrupts
-    128              // to ensure reliable Bluetooth transmission without Queue Flooding.
-    129              
-    130              if (EXTI_GetITStatus(EXTI_Line2) != RESET)
-   \   00000002   0x2004             MOVS     R0,#+4
+    130              if (EXTI_GetITStatus(EXTI_Line0) != RESET)
+   \   00000002   0x2001             MOVS     R0,#+1
    \   00000004   0x.... 0x....      BL       EXTI_GetITStatus
    \   00000008   0x2800             CMP      R0,#+0
-   \   0000000A   0xD002             BEQ.N    ??EXTI2_IRQHandler_0
+   \   0000000A   0xD005             BEQ.N    ??EXTI0_IRQHandler_0
     131              {
-    132                  EXTI_ClearITPendingBit(EXTI_Line2);
-   \   0000000C   0x2004             MOVS     R0,#+4
-   \   0000000E   0x.... 0x....      BL       EXTI_ClearITPendingBit
-    133              }
-    134          }
-   \                     ??EXTI2_IRQHandler_0: (+1)
-   \   00000012   0xBD01             POP      {R0,PC}          ;; return
-    135          
-    136          
-    137          /**
-    138            * @brief  This function handles USART2 global interrupt request (Bluetooth RX).
-    139            * (?@@ ?@@ @@@ ?@@??
-    140            */
-    141          /**
-    142            * @brief  This function handles USART1 global interrupt request (PC Communication).
-    143            * (PC?@@ ?@@???@@?@? @@@?@@@??@@ - Echo)
-    144            */
+    132                  // Set Global Touch Event Flag
+    133                  g_touch_event = 1;
+   \   0000000C   0x2001             MOVS     R0,#+1
+   \   0000000E   0x....             LDR.N    R1,??DataTable3
+   \   00000010   0x7008             STRB     R0,[R1, #+0]
+    134                  
+    135                  EXTI_ClearITPendingBit(EXTI_Line0);
+   \   00000012   0x2001             MOVS     R0,#+1
+   \   00000014   0x.... 0x....      BL       EXTI_ClearITPendingBit
+    136              }
+    137          }
+   \                     ??EXTI0_IRQHandler_0: (+1)
+   \   00000018   0xBD01             POP      {R0,PC}          ;; return
+    138          
+    139          
+    140          /**
+    141            * @brief  This function handles USART2 global interrupt request (Bluetooth RX).
+    142            * (?@@ ?@@ @@@ ?@@??
+    143            */
+    144          /**
+    145            * @brief  This function handles USART1 global interrupt request (PC Communication).
+    146            * (PC?@@ ?@@???@@?@? @@@?@@@??@@ - Echo)
+    147            */
 
    \                                 In section .text, align 2, keep-with-next
-    145          void USART1_IRQHandler(void)
-    146          {
+    148          void USART1_IRQHandler(void)
+    149          {
    \                     USART1_IRQHandler: (+1)
    \   00000000   0xB580             PUSH     {R7,LR}
-    147              uint16_t word;
-    148              volatile uint32_t timeout = 0;
+    150              uint16_t word;
+    151              volatile uint32_t timeout = 0;
    \   00000002   0x2000             MOVS     R0,#+0
    \   00000004   0x9000             STR      R0,[SP, #+0]
-    149          
-    150              if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+    152          
+    153              if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
    \   00000006   0xF240 0x5125      MOVW     R1,#+1317
-   \   0000000A   0x....             LDR.N    R0,??DataTable2  ;; 0x40013800
+   \   0000000A   0x....             LDR.N    R0,??DataTable3_1  ;; 0x40013800
    \   0000000C   0x.... 0x....      BL       USART_GetITStatus
    \   00000010   0x2800             CMP      R0,#+0
    \   00000012   0xD01C             BEQ.N    ??USART1_IRQHandler_0
-    151                  /* ?@@???@@???@@ */
-    152                  word = USART_ReceiveData(USART1);       
-   \   00000014   0x....             LDR.N    R0,??DataTable2  ;; 0x40013800
+    154                  /* ?@@???@@???@@ */
+    155                  word = USART_ReceiveData(USART1);       
+   \   00000014   0x....             LDR.N    R0,??DataTable3_1  ;; 0x40013800
    \   00000016   0x.... 0x....      BL       USART_ReceiveData
    \   0000001A   0x0001             MOVS     R1,R0
-    153          
-    154                  /* ?@@ @@@@€ @@@@??@@@€ ?€@?(Timeout ?@@) */
-    155                  // ISR ?@@??@@@ ?€@@@@??@@?@@ @@@?@@. @@@ @@@ @@?.
-    156                  while ((USART2->SR & USART_SR_TXE) == 0) {
+    156          
+    157                  /* ?@@ @@@@€ @@@@??@@@€ ?€@?(Timeout ?@@) */
+    158                  // ISR ?@@??@@@ ?€@@@@??@@?@@ @@@?@@. @@@ @@@ @@?.
+    159                  while ((USART2->SR & USART_SR_TXE) == 0) {
    \                     ??USART1_IRQHandler_1: (+1)
-   \   0000001C   0x....             LDR.N    R0,??DataTable2_1  ;; 0x40004400
+   \   0000001C   0x....             LDR.N    R0,??DataTable3_2  ;; 0x40004400
    \   0000001E   0x8800             LDRH     R0,[R0, #+0]
    \   00000020   0x0600             LSLS     R0,R0,#+24
    \   00000022   0xD406             BMI.N    ??USART1_IRQHandler_2
-    157                      if (++timeout > 5000) break; // Timeout guard
+    160                      if (++timeout > 5000) break; // Timeout guard
    \   00000024   0x9800             LDR      R0,[SP, #+0]
    \   00000026   0x1C40             ADDS     R0,R0,#+1
    \   00000028   0x9000             STR      R0,[SP, #+0]
    \   0000002A   0xF241 0x3289      MOVW     R2,#+5001
    \   0000002E   0x4290             CMP      R0,R2
    \   00000030   0xD3F4             BCC.N    ??USART1_IRQHandler_1
-    158                  }
-    159                  
-    160                  /* Timeout ?@@???@@ ?@@ */
-    161                  if (timeout <= 5000) {
+    161                  }
+    162                  
+    163                  /* Timeout ?@@???@@ ?@@ */
+    164                  if (timeout <= 5000) {
    \                     ??USART1_IRQHandler_2: (+1)
    \   00000032   0x9800             LDR      R0,[SP, #+0]
    \   00000034   0xF241 0x3289      MOVW     R2,#+5001
    \   00000038   0x4290             CMP      R0,R2
    \   0000003A   0xD203             BCS.N    ??USART1_IRQHandler_3
-    162                      USART_SendData(USART2, word);
+    165                      USART_SendData(USART2, word);
    \   0000003C   0xB289             UXTH     R1,R1            ;; ZeroExt  R1,R1,#+16,#+16
-   \   0000003E   0x....             LDR.N    R0,??DataTable2_1  ;; 0x40004400
+   \   0000003E   0x....             LDR.N    R0,??DataTable3_2  ;; 0x40004400
    \   00000040   0x.... 0x....      BL       USART_SendData
-    163                  }
-    164          
-    165                  /* RX ?@@?@@ ?@@@??@@??*/
-    166                  USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+    166                  }
+    167          
+    168                  /* RX ?@@?@@ ?@@@??@@??*/
+    169                  USART_ClearITPendingBit(USART1, USART_IT_RXNE);
    \                     ??USART1_IRQHandler_3: (+1)
    \   00000044   0xF240 0x5125      MOVW     R1,#+1317
-   \   00000048   0x....             LDR.N    R0,??DataTable2  ;; 0x40013800
+   \   00000048   0x....             LDR.N    R0,??DataTable3_1  ;; 0x40013800
    \   0000004A   0x.... 0x....      BL       USART_ClearITPendingBit
-    167              }
-    168          }
+    170              }
+    171          }
    \                     ??USART1_IRQHandler_0: (+1)
    \   0000004E   0xBD01             POP      {R0,PC}          ;; return
-    169          
-    170          /**
-    171            * @brief  This function handles USART2 global interrupt request (Bluetooth RX).
-    172            * (?@@ ?@@ @@@ ?@@??+ PC Echo)
-    173            */
+    172          
+    173          /**
+    174            * @brief  This function handles USART2 global interrupt request (Bluetooth RX).
+    175            * (?@@ ?@@ @@@ ?@@??+ PC Echo)
+    176            */
 
    \                                 In section .text, align 2, keep-with-next
-    174          void USART2_IRQHandler(void)
-    175          {
+    177          void USART2_IRQHandler(void)
+    178          {
    \                     USART2_IRQHandler: (+1)
    \   00000000   0xB5E0             PUSH     {R5-R7,LR}
-    176              OS_ERR err;
-    177              uint8_t rx_data;
-    178              volatile uint32_t timeout = 0;
+    179              OS_ERR err;
+    180              uint8_t rx_data;
+    181              volatile uint32_t timeout = 0;
    \   00000002   0x2000             MOVS     R0,#+0
    \   00000004   0x9000             STR      R0,[SP, #+0]
-    179              
-    180              // ?@@ @@@@€ @@@?@? ?@@ ?@@ (?@@???@@)
-    181              if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
+    182              
+    183              // ?@@ @@@@€ @@@?@? ?@@ ?@@ (?@@???@@)
+    184              if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
    \   00000006   0xF240 0x5125      MOVW     R1,#+1317
-   \   0000000A   0x....             LDR.N    R0,??DataTable2_1  ;; 0x40004400
+   \   0000000A   0x....             LDR.N    R0,??DataTable3_2  ;; 0x40004400
    \   0000000C   0x.... 0x....      BL       USART_GetITStatus
    \   00000010   0x2800             CMP      R0,#+0
    \   00000012   0xD028             BEQ.N    ??USART2_IRQHandler_0
-    182              {
-    183                  // 1. ?@@???@@
-    184                  rx_data = (uint8_t)USART_ReceiveData(USART2);
-   \   00000014   0x....             LDR.N    R0,??DataTable2_1  ;; 0x40004400
+    185              {
+    186                  // 1. ?@@???@@
+    187                  rx_data = (uint8_t)USART_ReceiveData(USART2);
+   \   00000014   0x....             LDR.N    R0,??DataTable3_2  ;; 0x40004400
    \   00000016   0x.... 0x....      BL       USART_ReceiveData
    \   0000001A   0xF88D 0x0004      STRB     R0,[SP, #+4]
-    185          
-    186                  // [Reference Logic] PC@??@@ ?@@ (Timeout ?@@)
-    187                  while ((USART1->SR & USART_SR_TXE) == 0) {
+    188          
+    189                  // [Reference Logic] PC@??@@ ?@@ (Timeout ?@@)
+    190                  while ((USART1->SR & USART_SR_TXE) == 0) {
    \                     ??USART2_IRQHandler_1: (+1)
-   \   0000001E   0x....             LDR.N    R0,??DataTable2  ;; 0x40013800
+   \   0000001E   0x....             LDR.N    R0,??DataTable3_1  ;; 0x40013800
    \   00000020   0x8800             LDRH     R0,[R0, #+0]
    \   00000022   0x0600             LSLS     R0,R0,#+24
    \   00000024   0xD406             BMI.N    ??USART2_IRQHandler_2
-    188                      if (++timeout > 5000) break; 
+    191                      if (++timeout > 5000) break; 
    \   00000026   0x9800             LDR      R0,[SP, #+0]
    \   00000028   0x1C40             ADDS     R0,R0,#+1
    \   0000002A   0x9000             STR      R0,[SP, #+0]
    \   0000002C   0xF241 0x3189      MOVW     R1,#+5001
    \   00000030   0x4288             CMP      R0,R1
    \   00000032   0xD3F4             BCC.N    ??USART2_IRQHandler_1
-    189                  }
-    190                  
-    191                  if (timeout <= 5000) {
+    192                  }
+    193                  
+    194                  if (timeout <= 5000) {
    \                     ??USART2_IRQHandler_2: (+1)
    \   00000034   0x9800             LDR      R0,[SP, #+0]
    \   00000036   0xF241 0x3189      MOVW     R1,#+5001
    \   0000003A   0x4288             CMP      R0,R1
    \   0000003C   0xD205             BCS.N    ??USART2_IRQHandler_3
-    192                      USART_SendData(USART1, rx_data);
+    195                      USART_SendData(USART1, rx_data);
    \   0000003E   0xF89D 0x1004      LDRB     R1,[SP, #+4]
    \   00000042   0xB289             UXTH     R1,R1            ;; ZeroExt  R1,R1,#+16,#+16
-   \   00000044   0x....             LDR.N    R0,??DataTable2  ;; 0x40013800
+   \   00000044   0x....             LDR.N    R0,??DataTable3_1  ;; 0x40013800
    \   00000046   0x.... 0x....      BL       USART_SendData
-    193                  }
-    194          
-    195                  // 2. ?@@???@@?@? Bluetooth_Task???@@ ?@@ (@@@@?@@@)
-    196                   OSQPost(&BluetoothRxQ, &rx_data, sizeof(rx_data), OS_OPT_POST_FIFO, &err);
+    196                  }
+    197          
+    198                  // 2. ?@@???@@?@? Bluetooth_Task???@@ ?@@ (@@@@?@@@)
+    199                   OSQPost(&BluetoothRxQ, &rx_data, sizeof(rx_data), OS_OPT_POST_FIFO, &err);
    \                     ??USART2_IRQHandler_3: (+1)
    \   0000004A   0xF10D 0x0006      ADD      R0,SP,#+6
    \   0000004E   0x9000             STR      R0,[SP, #+0]
    \   00000050   0x2300             MOVS     R3,#+0
    \   00000052   0x2201             MOVS     R2,#+1
    \   00000054   0xA901             ADD      R1,SP,#+4
-   \   00000056   0x....             LDR.N    R0,??DataTable2_2
+   \   00000056   0x....             LDR.N    R0,??DataTable3_3
    \   00000058   0x.... 0x....      BL       OSQPost
-    197                  
-    198                  // 3. ?@@?@@ ?@@@??@@?
-    199                  USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+    200                  
+    201                  // 3. ?@@?@@ ?@@@??@@?
+    202                  USART_ClearITPendingBit(USART2, USART_IT_RXNE);
    \   0000005C   0xF240 0x5125      MOVW     R1,#+1317
-   \   00000060   0x....             LDR.N    R0,??DataTable2_1  ;; 0x40004400
+   \   00000060   0x....             LDR.N    R0,??DataTable3_2  ;; 0x40004400
    \   00000062   0x.... 0x....      BL       USART_ClearITPendingBit
-    200              }
-    201          }
+    203              }
+    204          }
    \                     ??USART2_IRQHandler_0: (+1)
    \   00000066   0xBD07             POP      {R0-R2,PC}       ;; return
 
    \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable2:
+   \                     ??DataTable3:
+   \   00000000   0x........         DC32     g_touch_event
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_1:
    \   00000000   0x40013800         DC32     0x40013800
 
    \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable2_1:
+   \                     ??DataTable3_2:
    \   00000000   0x40004400         DC32     0x40004400
 
    \                                 In section .text, align 4, keep-with-next
-   \                     ??DataTable2_2:
+   \                     ??DataTable3_3:
    \   00000000   0x........         DC32     BluetoothRxQ
-    202          
-    203          
-    204          /**
-    205            * @brief  This function handles PPP interrupt request.
-    206            * @param  None
-    207            * @retval None
-    208            */
-    209          /*void PPP_IRQHandler(void)
-    210          {
-    211          }*/
+    205          
+    206          
+    207          /**
+    208            * @brief  This function handles PPP interrupt request.
+    209            * @param  None
+    210            * @retval None
+    211            */
+    212          /*void PPP_IRQHandler(void)
+    213          {
+    214          }*/
 
    Maximum stack usage in bytes:
 
@@ -427,7 +437,7 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\stm32f10x_it.
    ------- --------
        0   BusFault_Handler
        0   DebugMon_Handler
-       8   EXTI2_IRQHandler
+       8   EXTI0_IRQHandler
          8   -> EXTI_ClearITPendingBit
          8   -> EXTI_GetITStatus
        0   HardFault_Handler
@@ -456,12 +466,13 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\stm32f10x_it.
 
    Bytes  Function/Label
    -----  --------------
-       4  ??DataTable2
-       4  ??DataTable2_1
-       4  ??DataTable2_2
+       4  ??DataTable3
+       4  ??DataTable3_1
+       4  ??DataTable3_2
+       4  ??DataTable3_3
        2  BusFault_Handler
        2  DebugMon_Handler
-      20  EXTI2_IRQHandler
+      26  EXTI0_IRQHandler
        2  HardFault_Handler
        2  MemManage_Handler
        2  NMI_Handler
@@ -473,9 +484,9 @@ C:\Users\pnu3\Desktop\deskproject\Embedded_System_TermProject\user\stm32f10x_it.
        2  UsageFault_Handler
 
  
- 246 bytes in section .text
+ 256 bytes in section .text
  
- 246 bytes of CODE memory
+ 256 bytes of CODE memory
 
 Errors: none
 Warnings: none
