@@ -10,20 +10,20 @@
 #define PIR_PIN         GPIO_Pin_1
 #define PIR_RCC         RCC_APB2Periph_GPIOC
 
-// Touch Sensor (Remapped to PC2)
+// Touch Sensor (Confirmed on PC0)
 #define TOUCH_PORT      GPIOC
-#define TOUCH_PIN       GPIO_Pin_2
+#define TOUCH_PIN       GPIO_Pin_0
 #define TOUCH_RCC       RCC_APB2Periph_GPIOC
-#define TOUCH_EXTI_Line EXTI_Line2
+#define TOUCH_EXTI_Line EXTI_Line0
 #define TOUCH_PortSource GPIO_PortSourceGPIOC
-#define TOUCH_PinSource  GPIO_PinSource2
-#define TOUCH_IRQn       EXTI2_IRQn
+#define TOUCH_PinSource  GPIO_PinSource0
+#define TOUCH_IRQn       EXTI0_IRQn
 
-// Light Sensor (Restored to PB0/ADC12_IN8 for Unmoved HW)
-#define LIGHT_PORT      GPIOB
-#define LIGHT_PIN       GPIO_Pin_0
-#define LIGHT_RCC       RCC_APB2Periph_GPIOB
-#define LIGHT_ADC_CH    ADC_Channel_8
+// Light Sensor (Remapped to PC2)
+#define LIGHT_PORT      GPIOC
+#define LIGHT_PIN       GPIO_Pin_2
+#define LIGHT_RCC       RCC_APB2Periph_GPIOC
+#define LIGHT_ADC_CH    ADC_Channel_12
 
 // Servo Motor (Remapped to PB6/TIM4_CH1)
 #define SERVO_PORT      GPIOB

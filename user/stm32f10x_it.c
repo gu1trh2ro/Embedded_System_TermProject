@@ -18,6 +18,7 @@
 extern OS_Q   PirDataQ;    // 터치 센서 이벤트를 Status_Task로 전달 (MSG_TOUCH_RESET_CODE)
 extern OS_Q   BluetoothRxQ; // 수신된 블루투스 데이터를 Bluetooth_Task로 전달
 extern const uint8_t MSG_TOUCH_RESET_CODE; // main.c의 상수를 extern 선언
+extern const uint8_t MSG_TOUCH_RELEASE_CODE;
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -118,27 +119,17 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief  This function handles EXTI Line 1 interrupt request (Touch Sensor: PA.1).
+  * @brief  This function handles EXTI Line 2 interrupt request (Touch Sensor: PC.2).
   * (5단계: 수동 제어 - Status_Task에 즉시 처리 요청)
   */
-void EXTI1_IRQHandler(void)
+void EXTI2_IRQHandler(void)
 {
-    OS_ERR err;
-    uint8_t touch_code = MSG_TOUCH_RESET_CODE; // 255 값
-
-    if (EXTI_GetITStatus(EXTI_Line1) != RESET)
+    // Polling Method Used in PIR_Task instead of Interrupts
+    // to ensure reliable Bluetooth transmission without Queue Flooding.
+    
+    if (EXTI_GetITStatus(EXTI_Line2) != RESET)
     {
-        // 1. Touch_ISR 역할: Status_Task에 "즉시 처리" 메시지를 보냄.
-        // PIR 데이터 큐에 특수 코드를 넣어 Status_Task를 깨웁니다.
-        
-        // 인터럽트 발생 시 OS 함수를 호출할 때는 반드시 임계 영역(Critical Section) 진입 로직 필요
-         OSQPost(&PirDataQ, &touch_code, sizeof(touch_code), OS_OPT_POST_FIFO, &err); 
-        
-        // *[RTOS 미구현 시 디버깅용]*
-        // GPIO_WriteBit(GPIOC, GPIO_Pin_9, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOC, GPIO_Pin_9)));
-
-        // 2. 인터럽트 펜딩 비트 클리어
-        EXTI_ClearITPendingBit(EXTI_Line1);
+        EXTI_ClearITPendingBit(EXTI_Line2);
     }
 }
 

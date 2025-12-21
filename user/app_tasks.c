@@ -11,10 +11,11 @@ OS_Q ServoQ;
 OS_Q BluetoothRxQ;
 
 const uint8_t MSG_TOUCH_RESET_CODE = 255;
+const uint8_t MSG_TOUCH_RELEASE_CODE = 254;
 
 // Task Stacks & TCBs (Defined here or extern if needed elsewhere)
 OS_TCB PirTaskTCB;
-CPU_STK PirTaskStk[128];
+CPU_STK PirTaskStk[256]; // Increased Stack due to sprintf/multiple sensors
 
 OS_TCB StatusTaskTCB;
 CPU_STK StatusTaskStk[128];
@@ -40,13 +41,17 @@ volatile uint8_t g_debug_pir_val = 0; // GLOBAL DEBUG VARIABLE
 void PIR_Task(void *p_arg) {
 	OS_ERR err;
     uint8_t pir_val = 0;
-    static uint8_t prev_pir_val = 255; // Initial invalid value to force first update
+    static uint8_t prev_pir_val = 255; 
     
+    // Touch Sensor Variables
+    uint8_t touch_val = 0;
+    static uint8_t prev_touch_val = 0;
+
 	while(1) {
+        // --- 1. PIR Sensor Handling ---
         pir_val = PIR_Read();
         g_debug_pir_val = pir_val;
         
-        // Bluetooth Status Transmission (Change Detection)
         if (pir_val != prev_pir_val) {
             if (pir_val == 1) {
                 Bluetooth_SendString("OCCUPIED\r\n");
@@ -56,9 +61,43 @@ void PIR_Task(void *p_arg) {
             prev_pir_val = pir_val;
         }
         
-        if (pir_val == 1) { // Motion
-             OSQPost(&PirDataQ, &pir_val, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+        // --- 3. Light Sensor Handling (PC2) ---
+        // Change-based Polling (Like PIR/Touch)
+        // Only sending when value changes significantly to avoid noise.
+        uint16_t light_val = LightSensor_Read();
+        static uint16_t prev_light_val = 9999; // Force initial update
+        
+        int diff = (int)light_val - (int)prev_light_val;
+        if (diff < 0) diff = -diff;
+        
+        if (diff > 50) { // Threshold: 50 (approx 1.2% of range)
+             char light_msg[30];
+             sprintf(light_msg, "LIGHT: %d\r\n", light_val);
+             Bluetooth_SendString(light_msg);
+             prev_light_val = light_val;
         }
+        
+        if (pir_val == 1) { 
+             static uint8_t report_tick = 0;
+             if (++report_tick >= 20) {
+                 OSQPost(&PirDataQ, &pir_val, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                 report_tick = 0;
+             }
+        }
+
+        // --- 2. Touch Sensor Handling ---
+        // Reading TOUCH_PIN which is now mapped to PC0
+        touch_val = GPIO_ReadInputDataBit(TOUCH_PORT, TOUCH_PIN);
+        
+        if (touch_val != prev_touch_val) {
+            if (touch_val == 1) { // 1 = Pressed (Confirmed by Debug)
+                 Bluetooth_SendString("TOUCH\r\n");
+                 idle_counter = 0;
+                 suspicious_counter = 0;
+            } 
+            prev_touch_val = touch_val;
+        }
+
 		OSTimeDlyHMSM(0, 0, 0, 50, OS_OPT_TIME_HMSM_STRICT, &err);
 	}
 }
@@ -78,13 +117,29 @@ void Status_Task(void *p_arg) {
         msg = OSQPend(&PirDataQ, 1000, OS_OPT_PEND_BLOCKING, &size, NULL, &err);
 
         if (err == OS_ERR_NONE) {
-            // Motion Detected -> Occupied
-            idle_counter = 0;
-            suspicious_counter = 0;
-            if (current_state != 1) {
-                current_state = 1;
-                state_msg = current_state;
-                OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+            uint8_t val = *(uint8_t *)msg;
+            if (val == MSG_TOUCH_RESET_CODE) {
+                // Touch Press
+                Bluetooth_SendString("TOUCHED\r\n");
+                idle_counter = 0;
+                suspicious_counter = 0;
+                if (current_state != 1) {
+                    current_state = 1;
+                    state_msg = current_state;
+                    OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                }
+            } else if (val == MSG_TOUCH_RELEASE_CODE) {
+                // Touch Release
+                Bluetooth_SendString("TOUCH_RELEASED\r\n");
+            } else {
+                // PIR Motion (val == 1)
+                idle_counter = 0;
+                suspicious_counter = 0;
+                if (current_state != 1) {
+                    current_state = 1;
+                    state_msg = current_state;
+                    OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                }
             }
         } else if (err == OS_ERR_TIMEOUT) {
             // No Motion for 1 sec
@@ -233,7 +288,8 @@ void AppTaskStart(void *p_arg) {
     
     // Create Application Tasks
     // Status Task (5), PIR Task (4)
-    OSTaskCreate(&PirTaskTCB, "PIR Task", PIR_Task, 0, 4, &PirTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
+    // PIR Task Stack increased to 256
+    OSTaskCreate(&PirTaskTCB, "PIR Task", PIR_Task, 0, 4, &PirTaskStk[0], 25, 256, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
     OSTaskCreate(&StatusTaskTCB, "Status Task", Status_Task, 0, 5, &StatusTaskStk[0], 12, 128, 0, 0, 0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR, &err);
     
     // Display Task (6) - Increased Stack

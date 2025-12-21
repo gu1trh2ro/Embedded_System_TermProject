@@ -17,12 +17,12 @@ void GPIO_Configuration(void) {
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
     GPIO_Init(PIR_PORT, &GPIO_InitStructure);
 
-    // Touch Sensor (PC2) - Input Pull-down
+    // Touch Sensor (PC0) - Input Pull-down
     GPIO_InitStructure.GPIO_Pin = TOUCH_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
     GPIO_Init(TOUCH_PORT, &GPIO_InitStructure);
 
-    // Light Sensor (PC0/ADC) - Analog Input
+    // Light Sensor (PC2/ADC Ch12) - Analog Input
     GPIO_InitStructure.GPIO_Pin = LIGHT_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(LIGHT_PORT, &GPIO_InitStructure);
@@ -119,25 +119,29 @@ void TIM_Configuration(void) {
 void EXTI_Configuration(void) {
     EXTI_InitTypeDef EXTI_InitStructure;
     
-    // Connect EXTI Line to Touch Pin
+    // Touch Interrupt Config Disabled (Using Polling)
+    /*
     GPIO_EXTILineConfig(TOUCH_PortSource, TOUCH_PinSource);
 
     EXTI_InitStructure.EXTI_Line = TOUCH_EXTI_Line;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; // Touch triggers on rise
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling; 
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
+    */
 }
 
 void NVIC_Configuration(void) {
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    // Enable Touch Interrupt
+    // Touch Interrupt Disabled
+    /*
     NVIC_InitStructure.NVIC_IRQChannel = TOUCH_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F; 
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+    */
 
     /* USART1 Interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
@@ -249,17 +253,17 @@ void Bluetooth_SendString(char *str) {
     // Send to Bluetooth (USART2) Only
     while (*p) {
         timeout = 0;
+        // Wait for TX Empty (TXE)
         while ((USART2->SR & USART_SR_TXE) == 0) {
-            if (++timeout > 10000) break; // Timeout guard
+            if (++timeout > 300000) break; // Timeout increased for 9600bps
         }
-        if (timeout <= 10000) USART_SendData(USART2, *p);
+        if (timeout <= 300000) USART_SendData(USART2, *p);
         
         p++;
     }
     
-    // Newline/Space for readability
-    // Note: Removed \r\n to prevent phantom echo to PC. Using Space separator instead.
+    // Space separator
     timeout = 0;
-    while ((USART2->SR & USART_SR_TXE) == 0) { if (++timeout > 10000) break; }
-    if (timeout <= 10000) USART_SendData(USART2, ' ');
+    while ((USART2->SR & USART_SR_TXE) == 0) { if (++timeout > 300000) break; }
+    if (timeout <= 300000) USART_SendData(USART2, ' ');
 }
