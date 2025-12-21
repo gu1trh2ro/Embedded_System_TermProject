@@ -177,6 +177,9 @@ class ControlActivity : AppCompatActivity() {
                 
                 // Change state to EMPTY immediately upon connection
                 updateUI("EMPTY")
+                
+                // Send 'S' signal to the board immediately
+                bluetoothService?.sendCommand("S")
             } else if (msg.what == BluetoothService.MESSAGE_CONNECTION_FAILED) {
                 connectionStateDisplay.text = "연결 실패 (Failed)"
                 connectionStateDisplay.setTextColor(Color.RED)
