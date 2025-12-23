@@ -190,7 +190,27 @@ void Status_Task(void *p_arg) {
                 // --- AWAY MODE ---
                 away_timer++;
                 if (away_timer >= 13) {
-                    trigger_vacant = 1;
+                     // 1. Switch from AWAY to BACK (Occupied)
+                     current_state = 1;
+                     Bluetooth_SendString("BACK\r\n");
+                     
+                     // Update Display/State
+                     state_msg = current_state;
+                     OSQPost(&StateQ, &state_msg, sizeof(uint8_t), OS_OPT_POST_FIFO, &err);
+                     
+                     // 2. Fire Servo (as requested)
+                     uint8_t servo_cmd = 1;
+                     OSQPost(&ServoQ, &servo_cmd, 1, OS_OPT_POST_FIFO, &err);
+
+                     // 3. Check Light
+                     light_val = LightSensor_Read();
+                     if (light_val >= 100) {
+                         Bluetooth_SendString("turn off the light\r\n");
+                     }
+                     
+                     // Reset Counters
+                     away_timer = 0;
+                     idle_counter = 0;
                 }
             } else if (current_state == 1) {
                 // --- BACK MODE (Occupied) ---
